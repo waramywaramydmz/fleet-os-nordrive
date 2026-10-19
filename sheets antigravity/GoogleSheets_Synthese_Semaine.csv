@@ -1,0 +1,54 @@
+﻿N°;Chauffeur;Période;Chiffre Uber (€);Chiffre Bolt (€);Chiffre Heetch (€);TOTAL BRUT Semaine (€);Courses;Argent pris (Redevance Flotte) (€);Déduction Location (€);Déduction Espèces Encaissées (€);NET TOTAL À VERSER (€);Mode Paiement;Statut
+1;Siré Niakaté;20/09/2026 au 26/09/2026;1696.78;315.05;0.00;2011.83;93;50.00;0.00;526.14;1435.69;Virement SEPA;Prêt pour Virement
+2;Mohamed El Khabazi;20/09/2026 au 26/09/2026;1344.86;259.16;0.00;1604.02;74;50.00;0.00;224.82;1329.20;Virement SEPA;Prêt pour Virement
+3;Ali Alouani;20/09/2026 au 26/09/2026;994.20;946.24;0.00;1940.44;92;50.00;0.00;600.23;1290.21;Virement SEPA;Prêt pour Virement
+4;Ziaed Hamila;20/09/2026 au 26/09/2026;572.30;628.00;0.00;1200.30;57;50.00;0.00;0.00;1150.30;Virement SEPA;Prêt pour Virement
+5;Ali Kara;20/09/2026 au 26/09/2026;615.32;573.01;0.00;1188.33;57;40.00;0.00;0.00;1148.33;Virement SEPA;Prêt pour Virement
+6;Abdel Mouamane Chelaif;20/09/2026 au 26/09/2026;1122.41;63.67;0.00;1186.08;54;50.00;0.00;0.00;1136.08;Virement SEPA;Prêt pour Virement
+7;Sofiane Akli;20/09/2026 au 26/09/2026;1325.70;0.00;0.00;1325.70;60;50.00;0.00;180.23;1095.47;Virement SEPA;Prêt pour Virement
+8;Abdallah Hamzi;20/09/2026 au 26/09/2026;1073.08;0.00;0.00;1073.08;49;70.00;0.00;0.00;1003.08;Virement SEPA;Prêt pour Virement
+9;Fathia Boufalgha;20/09/2026 au 26/09/2026;1294.48;0.00;0.00;1294.48;59;50.00;0.00;271.88;972.60;Virement SEPA;Prêt pour Virement
+10;Abdelaziz Guerfi;20/09/2026 au 26/09/2026;1061.47;0.00;0.00;1061.47;48;50.00;0.00;99.77;911.70;Virement SEPA;Prêt pour Virement
+11;Aymen Ltifi;20/09/2026 au 26/09/2026;1039.45;86.56;0.00;1126.01;51;50.00;0.00;186.96;889.05;Virement SEPA;Prêt pour Virement
+12;Ryan Challab;20/09/2026 au 26/09/2026;853.61;131.66;0.00;985.27;46;50.00;0.00;49.88;885.39;Virement SEPA;Prêt pour Virement
+13;Mohamed Aloui;20/09/2026 au 26/09/2026;551.80;504.12;8.20;1064.12;51;70.00;0.00;125.98;868.14;Virement SEPA;Prêt pour Virement
+14;Mourad Bouakkaz;20/09/2026 au 26/09/2026;917.56;0.00;0.00;917.56;42;50.00;0.00;142.41;725.15;Virement SEPA;Prêt pour Virement
+15;Robert-ionut Neagu;20/09/2026 au 26/09/2026;620.80;182.57;51.13;854.50;40;50.00;0.00;122.10;682.40;Virement SEPA;Prêt pour Virement
+16;Bouchaib Belkharras;20/09/2026 au 26/09/2026;371.66;568.92;0.00;940.58;45;60.00;0.00;227.02;653.56;Virement SEPA;Prêt pour Virement
+17;Noureddine Tattouche;20/09/2026 au 26/09/2026;641.71;280.04;0.00;921.75;43;50.00;0.00;222.86;648.89;Virement SEPA;Prêt pour Virement
+18;Mohammed Adel Benabdelouahed;20/09/2026 au 26/09/2026;642.95;201.48;0.00;844.43;39;50.00;0.00;146.11;648.32;Virement SEPA;Prêt pour Virement
+19;Mehdi Bouchnag;20/09/2026 au 26/09/2026;684.26;100.64;0.00;784.90;36;50.00;0.00;112.60;622.30;Virement SEPA;Prêt pour Virement
+20;Foued Karoui;20/09/2026 au 26/09/2026;460.35;238.33;0.00;698.68;33;50.00;0.00;44.85;603.83;Virement SEPA;Prêt pour Virement
+21;Younoussa Bah;20/09/2026 au 26/09/2026;781.45;0.00;0.00;781.45;36;50.00;0.00;128.21;603.24;Virement SEPA;Prêt pour Virement
+22;Brahim Aloui;20/09/2026 au 26/09/2026;505.01;223.84;0.00;728.85;34;70.00;0.00;77.34;581.51;Virement SEPA;Prêt pour Virement
+23;Faical Jabri;20/09/2026 au 26/09/2026;763.73;0.00;0.00;763.73;35;50.00;0.00;135.15;578.58;Virement SEPA;Prêt pour Virement
+24;Christopher Andrew Mongis;20/09/2026 au 26/09/2026;680.49;0.00;0.00;680.49;31;50.00;0.00;74.52;555.97;Virement SEPA;Prêt pour Virement
+25;Ramzi Khannoussi;20/09/2026 au 26/09/2026;438.78;372.83;0.00;811.61;39;50.00;0.00;240.62;520.99;Virement SEPA;Prêt pour Virement
+26;Karim Sidibe;20/09/2026 au 26/09/2026;730.77;0.00;0.00;730.77;33;50.00;0.00;181.43;499.34;Virement SEPA;Prêt pour Virement
+27;Rachid Chinoune;20/09/2026 au 26/09/2026;428.80;163.42;0.00;592.22;27;70.00;0.00;85.36;436.86;Virement SEPA;Prêt pour Virement
+28;Ahmed Kherfouche;20/09/2026 au 26/09/2026;536.50;0.00;0.00;536.50;24;50.00;0.00;61.92;424.58;Virement SEPA;Prêt pour Virement
+29;Bechir Ben Smida;20/09/2026 au 26/09/2026;562.18;0.00;0.00;562.18;26;70.00;0.00;76.97;415.21;Virement SEPA;Prêt pour Virement
+30;Imane Sarraj;20/09/2026 au 26/09/2026;460.61;150.36;0.00;610.97;29;60.00;0.00;162.32;388.65;Virement SEPA;Prêt pour Virement
+31;Brandon Jean Jimmy Louissaint;20/09/2026 au 26/09/2026;252.52;816.44;25.20;1094.16;53;0.00;360.00;353.22;380.94;Virement SEPA;Prêt pour Virement
+32;Raoul Mansfeld Bemma;20/09/2026 au 26/09/2026;433.87;0.00;0.00;433.87;20;60.00;0.00;0.00;373.87;Virement SEPA;Prêt pour Virement
+33;Mehmet Ergun;20/09/2026 au 26/09/2026;230.10;353.33;0.00;583.43;28;60.00;0.00;191.38;332.05;Virement SEPA;Prêt pour Virement
+34;Zahia Guesri;20/09/2026 au 26/09/2026;156.32;347.78;0.00;504.10;24;50.00;0.00;146.37;307.73;Virement SEPA;Prêt pour Virement
+35;Mohamed Fehdi Ben Fekih;20/09/2026 au 26/09/2026;324.96;145.16;45.92;516.04;25;50.00;0.00;183.96;282.08;Virement SEPA;Prêt pour Virement
+36;Omar Chemkhi;20/09/2026 au 26/09/2026;288.97;0.00;0.00;288.97;13;50.00;0.00;12.93;226.04;Virement SEPA;Prêt pour Virement
+37;Haythem Dhifi;20/09/2026 au 26/09/2026;105.87;267.25;0.00;373.12;18;60.00;0.00;123.10;190.02;Virement SEPA;Prêt pour Virement
+38;Youcef Kherfouche;20/09/2026 au 26/09/2026;122.45;298.16;0.00;420.61;21;50.00;0.00;182.20;188.41;Virement SEPA;Prêt pour Virement
+39;Bryan Grégory Michaud;20/09/2026 au 26/09/2026;100.45;179.65;0.00;280.10;14;50.00;0.00;62.50;167.60;Virement SEPA;Prêt pour Virement
+40;Adam Machtou;20/09/2026 au 26/09/2026;0.00;237.18;0.00;237.18;12;50.00;0.00;23.40;163.78;Virement SEPA;Prêt pour Virement
+41;Rayen Klai;20/09/2026 au 26/09/2026;66.15;149.57;0.00;215.72;10;0.00;0.00;52.17;163.55;Virement SEPA;Prêt pour Virement
+42;Mohamed Bayrem Allagui;20/09/2026 au 26/09/2026;0.00;509.56;39.12;548.68;27;50.00;0.00;348.30;150.38;Virement SEPA;Prêt pour Virement
+43;Samir Laazibi;20/09/2026 au 26/09/2026;245.42;9.73;0.00;255.15;12;50.00;0.00;60.64;144.51;Virement SEPA;Prêt pour Virement
+44;Ratiba Guesri;20/09/2026 au 26/09/2026;132.03;301.45;0.00;433.48;21;50.00;0.00;318.84;64.64;Virement SEPA;Prêt pour Virement
+45;Farid Adkhis;20/09/2026 au 26/09/2026;252.95;0.00;0.00;252.95;11;50.00;0.00;154.95;48.00;Virement SEPA;Prêt pour Virement
+46;Issa Tandjigora;20/09/2026 au 26/09/2026;201.33;0.00;0.00;201.33;9;50.00;0.00;103.46;47.87;Virement SEPA;Prêt pour Virement
+47;Ousmane Sylla;20/09/2026 au 26/09/2026;123.35;0.00;0.00;123.35;6;50.00;0.00;31.89;41.46;Virement SEPA;Prêt pour Virement
+48;Khalid Okeil;20/09/2026 au 26/09/2026;34.13;57.01;0.00;91.14;5;50.00;0.00;0.00;41.14;Virement SEPA;Prêt pour Virement
+49;Asma Kissi;20/09/2026 au 26/09/2026;80.12;0.00;0.00;80.12;4;50.00;0.00;0.00;30.12;Virement SEPA;Prêt pour Virement
+50;Daba Gandega;20/09/2026 au 26/09/2026;91.78;0.00;0.00;91.78;4;50.00;0.00;32.69;9.09;Virement SEPA;Prêt pour Virement
+51;Aina Raharimanantsoa;20/09/2026 au 26/09/2026;1.00;0.00;0.00;1.00;1;1.00;0.00;0.00;0.00;Virement SEPA;Équilibré
+52;Raed Loghmari;20/09/2026 au 26/09/2026;28.06;440.31;0.00;468.37;23;60.00;0.00;423.54;-15.17;Virement SEPA;Dette Chauffeur (Espèces)
+53;Abdoul Azize Mohamed Safir;20/09/2026 au 26/09/2026;101.56;169.84;0.00;271.40;13;70.00;0.00;285.54;-84.14;Virement SEPA;Dette Chauffeur (Espèces)

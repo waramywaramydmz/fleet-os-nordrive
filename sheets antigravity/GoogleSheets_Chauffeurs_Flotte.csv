@@ -1,0 +1,167 @@
+﻿N°;Statut;Prénom;Nom;Téléphone;Email;Ville;Immatriculation;Modèle Véhicule;Carte VTC;SIREN;Plateformes;Redevance Flotte (€);Notes
+1;Docs en attente;Maayoufi; amor ;0749096470;cromentreprise@gmail.com;Marseille ;HG480ZM;Toyota corolla touring sport ;;;BOLT, HEETCH, UBER;50 €;
+2;rattache;Mohamed Aloui;17718ea5-13f3-4b88-8d54-c8c53a4f92b0;0,00;8,20;0,00;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+3;rattache;Mohamed Bayrem Allagui;3fa9207a-e45f-4528-ab42-eb9b2e62dfd1;0,00;39,12;0,00;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+4;rattache;Robert-Ionut Neagu;412e4c99-81a8-4cca-a01c-a7136e4965e9;-8,84;51,13;0,00;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+5;rattache;Brandon Louissaint;8726321e-1a99-45b6-b394-ed1bae3c314d;0,00;25,20;0,00;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+6;rattache;Mohamed Fehdi Ben Fekih;a3e3506e-8dc3-44bf-9346-ebe033369511;0,00;45,92;0,00;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+7;rattache;Abdoul Azize MOHAMED SAFIR;abazizsafir.pro@gmail.com;+33761529386;224.70;0.00;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+8;Actif;Abdoulah;Abbdi;+33664137913;abbdi.abdoulah1@gmail.com;Paris (Île-de-France);EK-102-ND;Berline VTC Conforme;VTC-IDF-2024003;948000002;BOLT, UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+9;rattache;705b20fb-6418-46eb-b0cb-189185267480;ABDALLAH;HAMZI;1073.08;1055.85;;Berline VTC Conforme;;-0.24;UBER, BOLT;50 €;
+10;rattache;c5fc6a45-db9e-4b52-a26f-407ad04c339e;Abdel Mouamane;Chelaif;1122.41;1070.22;;Berline VTC Conforme;;-0.40;UBER, BOLT;50 €;
+11;rattache;a53484f4-ce4a-4cbb-9b3a-8652f25c1afa;Abdelaziz;Guerfi;1061.47;1043.77;;Berline VTC Conforme;;-0.04;UBER, BOLT;50 €;
+12;rattache;c3bc3abe-643a-4431-ab51-8c06ede4b462;ABDOUL AZIZE;MOHAMED SAFIR;101.56;101.56;;Berline VTC Conforme;;-0.04;UBER, BOLT;50 €;
+13;rattache;581f0c82-a5b6-4157-9e93-37b2ad6f35e6;ADEL;BENABDELOUAHED;642.95;620.10;;Berline VTC Conforme;;-0.24;UBER, BOLT;50 €;
+14;Actif;Mohammed;Adel Benabdelouahed;;mohammed.adel benabdelouahed@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;BOLT;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+15;rattache;Mohammed Adel benabdelouahed;adelbenan@gmail.com;+33782790937;263.60;166.70;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+16;Actif;Farid;Adkhis;;farid.adkhis@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+17;rattache;96060c6f-36f8-4ff9-a6c0-92bc45a19075;Ahmed;Kherfouche;536.50;527.24;;Berline VTC Conforme;;-0.08;UBER, BOLT;50 €;
+18;rattache;e39f0ec7-249a-4d20-a228-c5182e032e26;AINA;RAHARIMANANTSOA;1.00;Paris;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+19;Actif;Sofiane;Akli;;sofiane.akli@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+20;rattache;771ff113-4690-410d-bc41-5b5ca3bb2040;Ali;Kara;615.32;588.50;;Berline VTC Conforme;;-0.32;UBER, BOLT;50 €;
+21;rattache;e476a2ba-2a1b-43c9-bbc4-cf7e93c83986;Ali;Alouani;994.20;972.86;;Berline VTC Conforme;;-0.16;UBER, BOLT;50 €;
+22;rattache;Ali Alouani;ali.alouani.95@gmail.com;+33618122054;1298.30;673.00;;Berline VTC Conforme;;7.00;UBER, BOLT;50 €;
+23;rattache;Ali Kara;ali1978kara@hotmail.fr;+33695644791;760.50;742.50;;Berline VTC Conforme;;9.00;UBER, BOLT;50 €;
+24;Actif;Ali;Alouani;+33618122054;ali.alouani.95@gmail.com;Paris (Île-de-France);EK-105-ND;Berline VTC Conforme;VTC-IDF-2024006;948000005;BOLT, UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+25;Actif;Mohamed;Aloui;+33600000027;mohamed.aloui@nordrive-flotte.fr;Paris (Île-de-France);EK-126-ND;Berline VTC Conforme;VTC-IDF-2024027;948000026;UBER;70 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+26;Actif;Brahim;Aloui;+33600000012;brahim.aloui@nordrive-flotte.fr;Paris (Île-de-France);EK-111-ND;Berline VTC Conforme;VTC-IDF-2024012;948000011;UBER, BOLT;70 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+27;rattache;brahim aloui;alouibrahim@ymail.com;+33624959758;293.92;249.50;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+28;Actif;Christopher;Andrew Mongis;;christopher.andrew mongis@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+29;rattache;5fb339a5-f955-44c6-8a50-6970397bb753;ASMA;KISSI;80.12;79.75;;Berline VTC Conforme;;-0.04;UBER, BOLT;50 €;
+30;rattache;42bc51e5-9514-4e9d-81ce-e7db3c6a2682;Aymen;Ltifi;1029.63;1021.46;;Berline VTC Conforme;;-0.20;UBER, BOLT;50 €;
+31;Actif;Younoussa;Bah;+33600000042;younoussa.bah@nordrive-flotte.fr;Paris (Île-de-France);EK-141-ND;Berline VTC Conforme;VTC-IDF-2024042;948000041;UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+32;Actif;Alhassane;Balde;;alhassane.balde@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 40).
+33;Actif;Mohamed;Bayrem Allagui;;mohamed.bayrem allagui@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;BOLT;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+34;rattache;Mohamed Bayrem Allagui;bayrouma18@gmail.com;+33621478333;717.92;322.20;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+35;rattache;a0e498bc-3c9b-4c82-bc49-18718ccca9f0;Bechir;Ben Smida;562.18;557.73;;Berline VTC Conforme;;-0.16;UBER, BOLT;50 €;
+36;Actif;Ratiba;Beldjoudi;;ratiba.beldjoudi@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+37;rattache;Ratiba GUESRI;beldjoudilina@hotmail.fr;+33695084256;411.10;65.70;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+38;Actif;Bouchaib;Belkharras;+33600000011;bouchaib.belkharras@nordrive-flotte.fr;Paris (Île-de-France);EK-110-ND;Berline VTC Conforme;VTC-IDF-2024011;948000010;UBER, BOLT;60 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+39;Actif;Idir;Belkhir;+33600000018;idir.belkhir@nordrive-flotte.fr;Paris (Île-de-France);EK-117-ND;Berline VTC Conforme;VTC-IDF-2024018;948000017;HEETCH, UBER;70 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+40;Actif;Raoul Mansfeld;Bemma;+33600000035;raoul.bemma@nordrive-flotte.fr;Paris (Île-de-France);EK-134-ND;Berline VTC Conforme;VTC-IDF-2024035;948000034;UBER;60 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+41;Actif;Mohamed Fehdi;Ben Fekih;+33662727924;mfbf@hotmail.fr;Paris (Île-de-France);EK-127-ND;Berline VTC Conforme;VTC-IDF-2024028;948000027;BOLT, UBER, HEETCH;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+42;Actif;Bechir;Ben Smida;+33600000009;bechir.bensmida@nordrive-flotte.fr;Paris (Île-de-France);EK-108-ND;Berline VTC Conforme;VTC-IDF-2024009;948000008;UBER, BOLT;70 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+43;Actif;Adel;Benabdelouahed;+33600000004;adel.benabdelouahed@nordrive-flotte.fr;Paris (Île-de-France);EK-103-ND;Berline VTC Conforme;VTC-IDF-2024004;948000003;UBER, BOLT;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+44;Actif;Elias;Bihi;+33600000015;elias.bihi@nordrive-flotte.fr;Paris (Île-de-France);EK-114-ND;Berline VTC Conforme;VTC-IDF-2024015;948000014;UBER, BOLT;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+45;rattache;3a100ded-7bc6-48d5-80d6-a84676c2ccd9;Bilel;Bouhali;3a100ded-7bc6-48d5-80d6-a84676c2ccd9.bilel@email.com;Paris;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+46;Actif;Mourad;Bouakkaz;+33600000029;mourad.bouakkaz@nordrive-flotte.fr;Paris (Île-de-France);EK-128-ND;Berline VTC Conforme;VTC-IDF-2024029;948000028;UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+47;rattache;Bouchaïb Belkharras;bouch.bb@hotmail.com;+33658123002;744.60;500.50;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+48;rattache;e53dc586-b4b6-4cba-9a6e-8ba2176e56c5;Bouchaib;Belkharras;371.66;353.54;;Berline VTC Conforme;;-0.12;UBER, BOLT;50 €;
+49;Actif;Mehdi;Bouchnag;;mehdi.bouchnag@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;BOLT;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+50;rattache;Mehdi Bouchnag;Bouchnagmehdi@yahoo.fr;+33623577818;130.30;128.30;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+51;Actif;Fathia;Boufalgha;;fathia.boufalgha@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+52;Actif;Bilel;Bouhali;+33600000010;bilel.bouhali@nordrive-flotte.fr;Paris (Île-de-France);EK-109-ND;Berline VTC Conforme;VTC-IDF-2024010;948000009;UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+53;rattache;8306d593-37dd-4c92-b152-ebf0ca5354b2;Brahim;Aloui;505.01;497.91;;Berline VTC Conforme;;-0.28;UBER, BOLT;50 €;
+54;rattache;376a7dae-410e-4a9f-977a-b8d876cbb322;BRANDON;+33 6 00 00 00 00;376a7dae-410e-4a9f-977a-b8d876cbb322.brandon@email.com;Paris;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+55;rattache;4db066f5-f324-4ce7-bc35-6cdc02744ec9;Bryan Grégory;Michaud;100.45;100.21;;Berline VTC Conforme;;-0.04;UBER, BOLT;50 €;
+56;rattache;Bryan Gregory Michaud;bryan.michaud11@gmail.com;+33783633084;242.50;173.10;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+57;Actif;Osoufi;Camara;+33760599135;camaraosoufi@gmail.com;Paris (Île-de-France);EK-129-ND;Berline VTC Conforme;VTC-IDF-2024030;948000029;BOLT, UBER, HEETCH;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+58;Prospect;Julien;caro;0601020304;julien@gmail.com;Paris (Île-de-France);;Berline VTC Conforme;;;UBER, BOLT, HEETCH;50 €;
+59;Actif;Ryan;Challab;;ryan.challab@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+60;rattache;Abdel Mouamane CHELAIF;chelaifmoumen@gmail.com;+33753606026;84.30;84.30;;Berline VTC Conforme;;0.00;UBER, BOLT;0 €;
+61;Actif;Omar;Chemkhi;;omar.chemkhi@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+62;Actif;Rachid;Chinoune;+33619305126;crtp2023@gmail.com;Paris (Île-de-France);EK-131-ND;Berline VTC Conforme;VTC-IDF-2024032;948000031;BOLT, UBER;70 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+63;rattache;2d271984-777e-4942-8f22-6c20d8d00036;Christopher Andrew;Mongis;680.49;676.12;;Berline VTC Conforme;;-0.12;UBER, BOLT;50 €;
+64;rattache;Rachid Chinoune;crtp2023@gmail.com;+33619305126;198.90;146.90;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+65;rattache;c96fdca4-dd00-4532-bdd3-8cbce2d7edb5;Daba;Gandega;91.78;89.35;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+66;Actif;Haythem;Dhifi;+33612674248;dhifi.haythem.hd@gmail.com;Paris (Île-de-France);EK-116-ND;Berline VTC Conforme;VTC-IDF-2024017;948000016;BOLT, UBER;60 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+67;rattache;Haythem Dhifi;dhifi.haythem.hd@gmail.com;+33612674248;343.92;158.70;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+68;rattache;TOTAL;Doc-6;-8,84;169,57;0,00;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+69;Actif;Mohamed;El Khabazi;;mohamed.el khabazi@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;BOLT;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+70;rattache;Mohamed El Khabazi;elkhabazimohamed1@gmail.com;+33784678499;342.40;246.70;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+71;Actif;Mehmet;Ergun;+33782313002;mht.egn1@icloud.com;Paris (Île-de-France);EK-124-ND;Berline VTC Conforme;VTC-IDF-2024025;948000024;BOLT, UBER;60 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+72;rattache;fa89767a-12bb-4a95-b1db-5fb71719a940;FAICAL;JABRI;763.73;751.73;;Berline VTC Conforme;;-0.20;UBER, BOLT;50 €;
+73;rattache;Mohamed Aloui;Fainflash@hotmail.com;+33762769951;662.04;539.70;;Berline VTC Conforme;;9.00;UBER, BOLT;50 €;
+74;rattache;187b8b07-85d6-4eeb-a866-cb8e3e477a54;Farid;Adkhis;252.95;251.85;;Berline VTC Conforme;;-0.04;UBER, BOLT;50 €;
+75;rattache;66cfb448-2a87-41ba-97f2-f0bb51b9b165;FATHIA;BOUFALGHA;1294.48;1270.05;;Berline VTC Conforme;;-0.32;UBER, BOLT;50 €;
+76;Actif;Salah;Fitouri;+33600000037;salah.fitouri@nordrive-flotte.fr;Paris (Île-de-France);EK-136-ND;Berline VTC Conforme;VTC-IDF-2024037;948000036;UBER, BOLT;70 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+77;rattache;31da3c25-4390-499d-bc4e-e950d3f52808;FOUED;KAROUI;460.35;457.51;;Berline VTC Conforme;;-0.04;UBER, BOLT;50 €;
+78;Actif;Daba;Gandega;;daba.gandega@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+79;Actif;Abdelaziz;Guerfi;;abdelaziz.guerfi@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+80;Actif;Zahia;Guesri;;zahia.guesri@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;BOLT;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+81;Actif;Ratiba;Guesri;;ratiba.guesri@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;BOLT;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+82;Actif;Ziaed;Hamila;+33650235792;teezere@outlook.fr;Paris (Île-de-France);EK-142-ND;Berline VTC Conforme;VTC-IDF-2024043;948000042;BOLT, UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+83;Actif;Abdallah;Hamzi;+33600000001;abdallah.hamzi@nordrive-flotte.fr;Paris (Île-de-France);EK-100-ND;Berline VTC Conforme;VTC-IDF-2024001;948000000;UBER, BOLT;70 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+84;rattache;ce4ca592-3925-46e2-8fcb-326ac5f81577;Haythem;Dhifi;105.87;105.74;;Berline VTC Conforme;;-0.08;UBER, BOLT;50 €;
+85;Prospect;Dahmani;Hidouche ;0641544136;hidouchedahmani22@gmail.com;Paris (Île-de-France);;Berline VTC Conforme;;;UBER, BOLT, HEETCH;50 €;
+86;rattache;9ee36418-ed86-45bf-ba00-67457101af89;Imane;Sarraj;460.61;453.67;;Berline VTC Conforme;;-0.28;UBER, BOLT;50 €;
+87;rattache;Imane Sarraj;imane.sar2009@gmail.com;+33658430022;197.20;131.10;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+88;rattache;9a0132ce-06c1-4d0f-82bd-f485d1b7479b;ISSA;TANDJIGORA;201.33;200.14;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+89;Actif;Faical;Jabri;;faical.jabri@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+90;Docs en attente;GEORGET;JEROME;0629420102;j.georgetjerome@outlook.fr;CANNES LA BOCCA;;Sans véhicule;;;UBER, BOLT, HEETCH;50 €;
+91;Actif;Ali;Kara;+33695644791;ali1978kara@hotmail.fr;Paris (Île-de-France);EK-106-ND;Berline VTC Conforme;VTC-IDF-2024007;948000006;BOLT, UBER;40 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+92;rattache;Foued Karoui;karfoued@gmail.com;+33625815497;338.40;338.40;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+93;rattache;66310da7-a454-4902-ba89-dc1ea3fa89af;Karim;Sidibe;730.77;706.97;;Berline VTC Conforme;;-0.04;UBER, BOLT;50 €;
+94;Actif;Foued;Karoui;+33600000016;foued.karoui@nordrive-flotte.fr;Paris (Île-de-France);EK-115-ND;Berline VTC Conforme;VTC-IDF-2024016;948000015;UBER, BOLT;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+95;Actif;Khaled;Kebli;+33765512904;kh.kebli@hotmail.com;Paris (Île-de-France);EK-122-ND;Berline VTC Conforme;VTC-IDF-2024023;948000022;BOLT, UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+96;Actif;Kamel;Kebli;+33605882286;k.kebli@outlook.fr;Paris (Île-de-France);EK-121-ND;Berline VTC Conforme;VTC-IDF-2024022;948000021;BOLT, UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+97;rattache;544038a7-0fbf-48ae-b170-b087c5b50353;Khalid;Okeil;34.13;33.74;;Berline VTC Conforme;;-0.08;UBER, BOLT;50 €;
+98;rattache;Khalid OKEIL;khalidokeil@outlook.fr;+33685369354;78.60;78.60;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+99;Actif;Ramzi;Khannoussi;+33682163015;ziram_k@yahoo.fr;Paris (Île-de-France);EK-133-ND;Berline VTC Conforme;VTC-IDF-2024034;948000033;BOLT, UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+100;Actif;Youcef;Kherfouche;+33600000041;youcef.kherfouche@nordrive-flotte.fr;Paris (Île-de-France);EK-140-ND;Berline VTC Conforme;VTC-IDF-2024041;948000040;UBER, BOLT;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+101;Actif;Ahmed;Kherfouche;+33600000005;ahmed.kherfouche@nordrive-flotte.fr;Paris (Île-de-France);EK-104-ND;Berline VTC Conforme;VTC-IDF-2024005;948000004;UBER, BOLT;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+102;rattache;Youcef Kherfouche;kherfoucheyoucef@gmail.com;+33624707164;399.30;180.70;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+103;Actif;Asma;Kissi;;asma.kissi@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+104;Actif;Rayen;Klai;+33766833146;rayenvtc@outlook.fr;Paris (Île-de-France);EK-135-ND;Berline VTC Conforme;VTC-IDF-2024036;948000035;BOLT, UBER;0 €;Direction Flotte Nordrive (0€ sans déduction)
+105;Location Contrat;Ouissem;Klai;+33682163015;ouissem.klai@gmail.com;Livry-Gargan (93);ET-219-AW;Toyota Auris (165 545 km);Délivré Aulnay 14/07/2026;88097714500015;VTC FLOTTE;231 €;Contrat Location 1000€/mois, Caution 800€, Full Services (15/07/2026 - 01/07/2027)
+106;Actif;Stéphane;Kouassi;+33601360917;koffivillepinte@gmail.com;Paris (Île-de-France);EK-139-ND;Berline VTC Conforme;VTC-IDF-2024040;948000039;BOLT, UBER, HEETCH;40 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+107;Actif;Samir;Laazibi;+33661926124;laazibisamir@gmail.com;Paris (Île-de-France);EK-137-ND;Berline VTC Conforme;VTC-IDF-2024038;948000037;BOLT, UBER, HEETCH;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+108;rattache;SAMIR LAAZIBI;laazibisamir@gmail.com;+33661926124;12.80;12.80;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+109;Actif;Raed;Loghmari;+33652147683;raed85@hotmail.fr;Paris (Île-de-France);EK-132-ND;Berline VTC Conforme;VTC-IDF-2024033;948000032;BOLT, UBER;60 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+110;Actif;Brandon Jean Jimmy;Louissaint;+33635481157;louissaintbrandon@hotmail.com;Paris (Île-de-France);EK-112-ND;Location Flotte Nordrive (360€/sem);VTC-IDF-2024013;948000012;BOLT, UBER, HEETCH;360 €;Location véhicule Nordrive (360€/semaine)
+111;rattache;JEAN-JIMMY;LOUISSAINT;252.52;248.40;2.12;;Berline VTC Conforme;;-0.12;UBER, BOLT;50 €;
+112;rattache;Brandon Jean Jimmy Louissaint;louissaintbrandon@hotmail.com;+33635481157;1081.20;761.40;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+113;Actif;Aymen;Ltifi;+33760731822;ltifiservices@outlook.com;Paris (Île-de-France);EK-107-ND;Berline VTC Conforme;VTC-IDF-2024008;948000007;BOLT, UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+114;rattache;Aymen Ltifi;ltifiservices@outlook.com;+33760731822;119.20;114.80;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+115;Actif;Adam;Machtou;;adam.machtou@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;BOLT;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+116;rattache;Adam Machtou;machtou.adam@gmail.com;+33618757203;306.20;258.30;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+117;rattache;8f960007-a5d4-4ab4-b73e-224304f9861f;MEHDI;BOUCHNAG;684.26;666.80;;Berline VTC Conforme;;-0.24;UBER, BOLT;50 €;
+118;rattache;7ed4458a-eaaa-4e6d-98f6-24871c279a8a;MEHMET;ERGUN;230.10;229.52;;Berline VTC Conforme;;-0.08;UBER, BOLT;50 €;
+119;rattache;Mohamed Fehdi Ben-Fekih;mfbf@hotmail.fr;+33662727924;191.10;81.30;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+120;rattache;Mehmet Ergun;Mht.Egn1@icloud.com;+33782313002;502.30;305.60;;Berline VTC Conforme;;9.00;UBER, BOLT;50 €;
+121;Actif;Bryan Grégory;Michaud;+33783633084;bryan.michaud11@gmail.com;Paris (Île-de-France);EK-113-ND;Berline VTC Conforme;VTC-IDF-2024014;948000013;BOLT, UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+122;Actif;Jovan;Milic;+33695405086;jovan93@outlook.fr;Paris (Île-de-France);EK-120-ND;Berline VTC Conforme;VTC-IDF-2024021;948000020;BOLT, UBER;60 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+123;rattache;9501a412-f396-4d5e-80e6-05d9b3276311;Mohamed;El Khabazi;1344.86;1331.80;;Berline VTC Conforme;;-0.44;UBER, BOLT;50 €;
+124;rattache;a2f299ae-f623-4841-935b-52caf47aef66;MOHAMED;ALOUi;551.80;534.47;;Berline VTC Conforme;;-0.16;UBER, BOLT;50 €;
+125;rattache;59899875-c5d2-40a1-996e-1277a84e76ed;MOHAMED FEHDI;BEN-FEKIH;324.96;311.74;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+126;Actif;Abdoul Azize;Mohamed Safir;+33600000002;safir.abdoul@nordrive-flotte.fr;Paris (Île-de-France);EK-101-ND;Berline VTC Conforme;VTC-IDF-2024002;948000001;UBER;70 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+127;Actif;Abdel;Mouamane Chelaif;;abdel.mouamane chelaif@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;BOLT;0 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+128;rattache;d409253e-52f5-4816-9e78-6b890db203cb;Mourad;Bouakkaz;917.56;876.62;;Berline VTC Conforme;;-0.24;UBER, BOLT;50 €;
+129;Actif;Robert-ionut;Neagu;;robert ionut.neagu@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;BOLT;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+130;Actif;Siré;Niakaté;+33764005951;sireniakate71@gmail.com;Paris (Île-de-France);EK-138-ND;Berline VTC Conforme;VTC-IDF-2024039;948000038;BOLT, UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+131;rattache;44575ef7-0936-445e-9dad-2325f7d54d1f;Noureddine;Tattouche;641.71;634.38;;Berline VTC Conforme;;-0.20;UBER, BOLT;50 €;
+132;Actif;Khalid;Okeil;+33685369354;khalidokeil@outlook.fr;Paris (Île-de-France);EK-123-ND;Berline VTC Conforme;VTC-IDF-2024024;948000023;BOLT, UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+133;rattache;39e958a9-e12f-4199-ba5a-460c3e2d9187;Omar;Chemkhi;288.97;284.04;;Berline VTC Conforme;;-0.40;UBER, BOLT;50 €;
+134;Actif;Ryan;Ouali Challab;;ryan.ouali challab@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;BOLT;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+135;rattache;bac2a019-9062-4116-9085-6da102d70c5d;OUSMANE;SYLLA;123.35;123.11;;Berline VTC Conforme;;-0.04;UBER, BOLT;50 €;
+136;rattache;bce74b3a-5d74-4cb9-ab0a-c6746f1ccdd8;rachid;CHINOUNE;428.80;388.46;;Berline VTC Conforme;;-0.32;UBER, BOLT;50 €;
+137;rattache;cadfccc3-9db9-4c32-bbf9-72ba92144aa8;Raed;Loghmari;28.06;27.94;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+138;rattache;Raed Loghmari;raed85@hotmail.fr;+33652147683;606.50;115.80;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+139;Actif;Aina;Raharimanantsoa;;aina.raharimanantsoa@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+140;rattache;7e6b9ac8-24f0-4325-902e-2631b16f1f54;Ramzi;Khannoussi;438.78;425.99;;Berline VTC Conforme;;-0.20;UBER, BOLT;50 €;
+141;rattache;01e09944-7e3c-456e-87ec-7c45c1b3cc26;Raoul Mansfeld;Bemma;433.87;419.26;;Berline VTC Conforme;;-0.20;UBER, BOLT;50 €;
+142;rattache;e4157312-32c8-469d-b099-30f3b16cbe69;Ratiba;Beldjoudi;132.03;128.50;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+143;rattache;eeffcd94-27a8-4b15-82e4-42996a50bc84;Rayen;Klai;66.15;66.06;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+144;rattache;Rayen Klai;rayenvtc@outlook.fr;+33766833146;195.40;141.10;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+145;Actif;Merouane;Remam;+33656847648;midoremam@hotmail.com;Paris (Île-de-France);EK-125-ND;Berline VTC Conforme;VTC-IDF-2024026;948000025;BOLT;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+146;rattache;ba779469-ba34-4105-ae7e-5da93a3217f9;Robert-Ionut;Neagu;620.80;602.72;;Berline VTC Conforme;;-0.16;UBER, BOLT;50 €;
+147;rattache;Robert-Ionut Neagu;robertneagu44@gmail.com;+33656859258;240.80;179.50;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+148;rattache;61931f3a-cf60-42e3-9ef6-52108004b6d6;Ryan;Challab;853.61;488.56;;Berline VTC Conforme;;-0.12;UBER, BOLT;50 €;
+149;rattache;Ryan Ouali Challab;ryanchallab93600@gmail.com;+33768419070;173.50;172.50;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+150;rattache;ed046710-cb81-4e10-8981-2408f8f6d7a3;Samir;Laazibi;245.42;231.97;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+151;Actif;Imane;Sarraj;+33600000019;imane.sarraj@nordrive-flotte.fr;Paris (Île-de-France);EK-118-ND;Berline VTC Conforme;VTC-IDF-2024019;948000018;UBER, BOLT;60 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+152;Actif;Karim;Sidibe;;karim.sidibe@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;UBER;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+153;rattache;983c63ed-2f31-43bd-b79f-b677ca5065fa;SIRE CYRIL;NIAKATE;1688.69;1673.61;;Berline VTC Conforme;;-0.12;UBER, BOLT;50 €;
+154;rattache;Siré Niakaté;sireniakate71@gmail.com;+33764005951;423.10;223.90;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+155;rattache;aaab1c40-042f-4a3c-916b-e6b59e4c0f44;Sofiane;Akli;1325.70;1238.63;;Berline VTC Conforme;;-0.08;UBER, BOLT;50 €;
+156;Actif;Ousmane;Sylla;+33600000031;ousmane.sylla@nordrive-flotte.fr;Paris (Île-de-France);EK-130-ND;Berline VTC Conforme;VTC-IDF-2024031;948000030;UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+157;Actif;Issa;Tandjigora;+33767662529;issasenypro@gmail.com;Paris (Île-de-France);EK-119-ND;Berline VTC Conforme;VTC-IDF-2024020;948000019;BOLT, UBER;50 €;Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+158;Actif;Noureddine;Tattouche;;noureddine.tattouche@nordrive-flotte.fr;Paris (Île-de-France);;Berline VTC Conforme;;;BOLT;50 €;Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+159;rattache;Noureddine Tattouche;tattouche.noureddine@yahoo.com;+33675941291;373.90;261.30;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+160;rattache;Ziaed Hamila;Teezere@outlook.fr;+33650235792;835.40;810.40;;Berline VTC Conforme;;25.00;UBER, BOLT;50 €;
+161;rattache;4afc3041-1d5f-48ca-976b-6e56d4e71b8d;Youcef;Kherfouche;122.45;121.58;;Berline VTC Conforme;;-0.04;UBER, BOLT;50 €;
+162;rattache;3adffadf-6d60-4a2f-a6e3-4ca3ffe3a72c;YOUNOUSSA;BAH;772.08;767.45;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+163;rattache;a60930ad-c1e7-4984-9893-e4bfe2db96b0;Zahia;Guesri;156.32;151.22;;Berline VTC Conforme;;-0.03;UBER, BOLT;50 €;
+164;rattache;Zahia Guesri;zaza.guess@hotmail.fr;+33669354856;455.92;304.30;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;
+165;rattache;c301c784-1c1d-44fd-8106-615e30556e7e;ZIAED;HAMILA;572.30;559.51;;Berline VTC Conforme;;;UBER, BOLT;50 €;
+166;rattache;Ramzi Khannoussi;ziram_k@yahoo.fr;+33682163015;497.80;295.70;;Berline VTC Conforme;;0.00;UBER, BOLT;50 €;

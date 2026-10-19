@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Flotte Nordrive - Export Google Sheets & Virements Qonto</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #151d2f;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #23314d;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --qonto: #6366f1;
+      --success: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 25px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+    .title h1 { font-size: 24px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .title p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    
+    .top-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .btn-sheets { background: #0f9d58; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-sheets:hover { background: #0b8043; }
+    .btn-download-xls { background: #1e293b; color: #38bdf8; border: 1px solid #38bdf8; padding: 10px 16px; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-download-xls:hover { background: rgba(56,189,248,0.1); }
+    .btn-qonto { background: #4f46e5; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-qonto:hover { background: #4338ca; }
+
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; overflow-x: auto; }
+    .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 18px; font-size: 14px; font-weight: 600; border-radius: 6px; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+    .tab-btn.active { background: var(--card); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 1px solid var(--border); }
+    
+    .panel { display: none; background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; }
+    .panel.active { display: block; }
+
+    .actions-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; flex-wrap: wrap; }
+    .btn-copy { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-copy:hover { background: var(--primary-hover); }
+    .copy-alert { color: #34d399; font-size: 13px; font-weight: 600; display: none; margin-left: 10px; }
+
+    .table-container { overflow-x: auto; max-height: 650px; border-radius: 8px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    th { background: #0b111e; color: #94a3b8; padding: 12px 14px; font-weight: 600; position: sticky; top: 0; z-index: 10; white-space: nowrap; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); white-space: nowrap; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .qonto-notice { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 14px 18px; margin-bottom: 15px; font-size: 13.5px; color: #c7d2fe; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="title">
+      <h1>🚖 Google Sheets Flotte Nordrive - Semaine 32</h1>
+      <p>Uber, Bolt, Heetch + Synthèse Brut & Net + Tableau Virements Automatiques Qonto</p>
+    </div>
+    <div class="top-actions">
+      <a href="Qonto_Import_Virements_S32.csv" download class="btn-qonto">
+        ⚡ Télécharger le CSV Direct Qonto
+      </a>
+      <a href="Nordrive_Flotte_Master_Multi_Onglets.xls" download class="btn-download-xls">
+        📥 Télécharger le Classeur Multi-Onglets (.xls)
+      </a>
+      <a href="https://sheets.new" target="_blank" class="btn-sheets">
+        📊 Ouvrir Google Sheets
+      </a>
+    </div>
+  </div>
+
+  <div class="tabs">
+    
+      <button class="tab-btn active" onclick="showTab('tab-synthese')">📊 1. Synthèse Brut & Net</button>
+    
+      <button class="tab-btn " onclick="showTab('tab-qonto')">🏦 2. Tableau Virements QONTO (IBAN & Net)</button>
+    
+      <button class="tab-btn " onclick="showTab('tab-uber')">⚫ 3. Uber Semaine (CSV Brut)</button>
+    
+      <button class="tab-btn " onclick="showTab('tab-bolt')">🟢 4. Bolt Semaine (CSV Brut)</button>
+    
+      <button class="tab-btn " onclick="showTab('tab-heetch')">🔴 5. Heetch Semaine (CSV Brut)</button>
+    
+      <button class="tab-btn " onclick="showTab('tab-drivers')">📋 6. Annuaire Chauffeurs & Véhicules (48)</button>
+    
+  </div>
+
+  
+    <div id="tab-synthese" class="panel active">
+      
+
+      <div class="actions-bar">
+        <div>
+          <button class="btn-copy" onclick="copyTable('tab-synthese-tsv', 'alert-tab-synthese')">
+            📋 Copier cet onglet pour Google Sheets (Ctrl+C direct)
+          </button>
+          <span id="alert-tab-synthese" class="copy-alert">✓ Copié dans le presse-papier ! Faites Ctrl+V dans Google Sheets</span>
+        </div>
+        <div style="color: var(--text-muted); font-size: 13px;">
+          Fichier généré : <code>GoogleSheets_Synthese_Semaine.csv</code> (53 lignes)
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>N°</th><th>Chauffeur</th><th>Période</th><th>Chiffre Uber (€)</th><th>Chiffre Bolt (€)</th><th>Chiffre Heetch (€)</th><th>TOTAL BRUT Semaine (€)</th><th>Courses</th><th>Argent pris (Redevance Flotte) (€)</th><th>Déduction Location (€)</th><th>Déduction Espèces Encaissées (€)</th><th>NET TOTAL À VERSER (€)</th><th>Mode Paiement</th><th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>1</td><td>Siré Niakaté</td><td>20/09/2026 au 26/09/2026</td><td>1696.78</td><td>315.05</td><td>0.00</td><td>2011.83</td><td>93</td><td>50.00</td><td>0.00</td><td>526.14</td><td>1435.69</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>2</td><td>Mohamed El Khabazi</td><td>20/09/2026 au 26/09/2026</td><td>1344.86</td><td>259.16</td><td>0.00</td><td>1604.02</td><td>74</td><td>50.00</td><td>0.00</td><td>224.82</td><td>1329.20</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>3</td><td>Ali Alouani</td><td>20/09/2026 au 26/09/2026</td><td>994.20</td><td>946.24</td><td>0.00</td><td>1940.44</td><td>92</td><td>50.00</td><td>0.00</td><td>600.23</td><td>1290.21</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>4</td><td>Ziaed Hamila</td><td>20/09/2026 au 26/09/2026</td><td>572.30</td><td>628.00</td><td>0.00</td><td>1200.30</td><td>57</td><td>50.00</td><td>0.00</td><td>0.00</td><td>1150.30</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>5</td><td>Ali Kara</td><td>20/09/2026 au 26/09/2026</td><td>615.32</td><td>573.01</td><td>0.00</td><td>1188.33</td><td>57</td><td>40.00</td><td>0.00</td><td>0.00</td><td>1148.33</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>6</td><td>Abdel Mouamane Chelaif</td><td>20/09/2026 au 26/09/2026</td><td>1122.41</td><td>63.67</td><td>0.00</td><td>1186.08</td><td>54</td><td>50.00</td><td>0.00</td><td>0.00</td><td>1136.08</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>7</td><td>Sofiane Akli</td><td>20/09/2026 au 26/09/2026</td><td>1325.70</td><td>0.00</td><td>0.00</td><td>1325.70</td><td>60</td><td>50.00</td><td>0.00</td><td>180.23</td><td>1095.47</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>8</td><td>Abdallah Hamzi</td><td>20/09/2026 au 26/09/2026</td><td>1073.08</td><td>0.00</td><td>0.00</td><td>1073.08</td><td>49</td><td>70.00</td><td>0.00</td><td>0.00</td><td>1003.08</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>9</td><td>Fathia Boufalgha</td><td>20/09/2026 au 26/09/2026</td><td>1294.48</td><td>0.00</td><td>0.00</td><td>1294.48</td><td>59</td><td>50.00</td><td>0.00</td><td>271.88</td><td>972.60</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>10</td><td>Abdelaziz Guerfi</td><td>20/09/2026 au 26/09/2026</td><td>1061.47</td><td>0.00</td><td>0.00</td><td>1061.47</td><td>48</td><td>50.00</td><td>0.00</td><td>99.77</td><td>911.70</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>11</td><td>Aymen Ltifi</td><td>20/09/2026 au 26/09/2026</td><td>1039.45</td><td>86.56</td><td>0.00</td><td>1126.01</td><td>51</td><td>50.00</td><td>0.00</td><td>186.96</td><td>889.05</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>12</td><td>Ryan Challab</td><td>20/09/2026 au 26/09/2026</td><td>853.61</td><td>131.66</td><td>0.00</td><td>985.27</td><td>46</td><td>50.00</td><td>0.00</td><td>49.88</td><td>885.39</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>13</td><td>Mohamed Aloui</td><td>20/09/2026 au 26/09/2026</td><td>551.80</td><td>504.12</td><td>8.20</td><td>1064.12</td><td>51</td><td>70.00</td><td>0.00</td><td>125.98</td><td>868.14</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>14</td><td>Mourad Bouakkaz</td><td>20/09/2026 au 26/09/2026</td><td>917.56</td><td>0.00</td><td>0.00</td><td>917.56</td><td>42</td><td>50.00</td><td>0.00</td><td>142.41</td><td>725.15</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>15</td><td>Robert-ionut Neagu</td><td>20/09/2026 au 26/09/2026</td><td>620.80</td><td>182.57</td><td>51.13</td><td>854.50</td><td>40</td><td>50.00</td><td>0.00</td><td>122.10</td><td>682.40</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>16</td><td>Bouchaib Belkharras</td><td>20/09/2026 au 26/09/2026</td><td>371.66</td><td>568.92</td><td>0.00</td><td>940.58</td><td>45</td><td>60.00</td><td>0.00</td><td>227.02</td><td>653.56</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>17</td><td>Noureddine Tattouche</td><td>20/09/2026 au 26/09/2026</td><td>641.71</td><td>280.04</td><td>0.00</td><td>921.75</td><td>43</td><td>50.00</td><td>0.00</td><td>222.86</td><td>648.89</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>18</td><td>Mohammed Adel Benabdelouahed</td><td>20/09/2026 au 26/09/2026</td><td>642.95</td><td>201.48</td><td>0.00</td><td>844.43</td><td>39</td><td>50.00</td><td>0.00</td><td>146.11</td><td>648.32</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>19</td><td>Mehdi Bouchnag</td><td>20/09/2026 au 26/09/2026</td><td>684.26</td><td>100.64</td><td>0.00</td><td>784.90</td><td>36</td><td>50.00</td><td>0.00</td><td>112.60</td><td>622.30</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>20</td><td>Foued Karoui</td><td>20/09/2026 au 26/09/2026</td><td>460.35</td><td>238.33</td><td>0.00</td><td>698.68</td><td>33</td><td>50.00</td><td>0.00</td><td>44.85</td><td>603.83</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>21</td><td>Younoussa Bah</td><td>20/09/2026 au 26/09/2026</td><td>781.45</td><td>0.00</td><td>0.00</td><td>781.45</td><td>36</td><td>50.00</td><td>0.00</td><td>128.21</td><td>603.24</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>22</td><td>Brahim Aloui</td><td>20/09/2026 au 26/09/2026</td><td>505.01</td><td>223.84</td><td>0.00</td><td>728.85</td><td>34</td><td>70.00</td><td>0.00</td><td>77.34</td><td>581.51</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>23</td><td>Faical Jabri</td><td>20/09/2026 au 26/09/2026</td><td>763.73</td><td>0.00</td><td>0.00</td><td>763.73</td><td>35</td><td>50.00</td><td>0.00</td><td>135.15</td><td>578.58</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>24</td><td>Christopher Andrew Mongis</td><td>20/09/2026 au 26/09/2026</td><td>680.49</td><td>0.00</td><td>0.00</td><td>680.49</td><td>31</td><td>50.00</td><td>0.00</td><td>74.52</td><td>555.97</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>25</td><td>Ramzi Khannoussi</td><td>20/09/2026 au 26/09/2026</td><td>438.78</td><td>372.83</td><td>0.00</td><td>811.61</td><td>39</td><td>50.00</td><td>0.00</td><td>240.62</td><td>520.99</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>26</td><td>Karim Sidibe</td><td>20/09/2026 au 26/09/2026</td><td>730.77</td><td>0.00</td><td>0.00</td><td>730.77</td><td>33</td><td>50.00</td><td>0.00</td><td>181.43</td><td>499.34</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>27</td><td>Rachid Chinoune</td><td>20/09/2026 au 26/09/2026</td><td>428.80</td><td>163.42</td><td>0.00</td><td>592.22</td><td>27</td><td>70.00</td><td>0.00</td><td>85.36</td><td>436.86</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>28</td><td>Ahmed Kherfouche</td><td>20/09/2026 au 26/09/2026</td><td>536.50</td><td>0.00</td><td>0.00</td><td>536.50</td><td>24</td><td>50.00</td><td>0.00</td><td>61.92</td><td>424.58</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>29</td><td>Bechir Ben Smida</td><td>20/09/2026 au 26/09/2026</td><td>562.18</td><td>0.00</td><td>0.00</td><td>562.18</td><td>26</td><td>70.00</td><td>0.00</td><td>76.97</td><td>415.21</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>30</td><td>Imane Sarraj</td><td>20/09/2026 au 26/09/2026</td><td>460.61</td><td>150.36</td><td>0.00</td><td>610.97</td><td>29</td><td>60.00</td><td>0.00</td><td>162.32</td><td>388.65</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>31</td><td>Brandon Jean Jimmy Louissaint</td><td>20/09/2026 au 26/09/2026</td><td>252.52</td><td>816.44</td><td>25.20</td><td>1094.16</td><td>53</td><td>0.00</td><td>360.00</td><td>353.22</td><td>380.94</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>32</td><td>Raoul Mansfeld Bemma</td><td>20/09/2026 au 26/09/2026</td><td>433.87</td><td>0.00</td><td>0.00</td><td>433.87</td><td>20</td><td>60.00</td><td>0.00</td><td>0.00</td><td>373.87</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>33</td><td>Mehmet Ergun</td><td>20/09/2026 au 26/09/2026</td><td>230.10</td><td>353.33</td><td>0.00</td><td>583.43</td><td>28</td><td>60.00</td><td>0.00</td><td>191.38</td><td>332.05</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>34</td><td>Zahia Guesri</td><td>20/09/2026 au 26/09/2026</td><td>156.32</td><td>347.78</td><td>0.00</td><td>504.10</td><td>24</td><td>50.00</td><td>0.00</td><td>146.37</td><td>307.73</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>35</td><td>Mohamed Fehdi Ben Fekih</td><td>20/09/2026 au 26/09/2026</td><td>324.96</td><td>145.16</td><td>45.92</td><td>516.04</td><td>25</td><td>50.00</td><td>0.00</td><td>183.96</td><td>282.08</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>36</td><td>Omar Chemkhi</td><td>20/09/2026 au 26/09/2026</td><td>288.97</td><td>0.00</td><td>0.00</td><td>288.97</td><td>13</td><td>50.00</td><td>0.00</td><td>12.93</td><td>226.04</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>37</td><td>Haythem Dhifi</td><td>20/09/2026 au 26/09/2026</td><td>105.87</td><td>267.25</td><td>0.00</td><td>373.12</td><td>18</td><td>60.00</td><td>0.00</td><td>123.10</td><td>190.02</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>38</td><td>Youcef Kherfouche</td><td>20/09/2026 au 26/09/2026</td><td>122.45</td><td>298.16</td><td>0.00</td><td>420.61</td><td>21</td><td>50.00</td><td>0.00</td><td>182.20</td><td>188.41</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>39</td><td>Bryan Grégory Michaud</td><td>20/09/2026 au 26/09/2026</td><td>100.45</td><td>179.65</td><td>0.00</td><td>280.10</td><td>14</td><td>50.00</td><td>0.00</td><td>62.50</td><td>167.60</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>40</td><td>Adam Machtou</td><td>20/09/2026 au 26/09/2026</td><td>0.00</td><td>237.18</td><td>0.00</td><td>237.18</td><td>12</td><td>50.00</td><td>0.00</td><td>23.40</td><td>163.78</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>41</td><td>Rayen Klai</td><td>20/09/2026 au 26/09/2026</td><td>66.15</td><td>149.57</td><td>0.00</td><td>215.72</td><td>10</td><td>0.00</td><td>0.00</td><td>52.17</td><td>163.55</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>42</td><td>Mohamed Bayrem Allagui</td><td>20/09/2026 au 26/09/2026</td><td>0.00</td><td>509.56</td><td>39.12</td><td>548.68</td><td>27</td><td>50.00</td><td>0.00</td><td>348.30</td><td>150.38</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>43</td><td>Samir Laazibi</td><td>20/09/2026 au 26/09/2026</td><td>245.42</td><td>9.73</td><td>0.00</td><td>255.15</td><td>12</td><td>50.00</td><td>0.00</td><td>60.64</td><td>144.51</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>44</td><td>Ratiba Guesri</td><td>20/09/2026 au 26/09/2026</td><td>132.03</td><td>301.45</td><td>0.00</td><td>433.48</td><td>21</td><td>50.00</td><td>0.00</td><td>318.84</td><td>64.64</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>45</td><td>Farid Adkhis</td><td>20/09/2026 au 26/09/2026</td><td>252.95</td><td>0.00</td><td>0.00</td><td>252.95</td><td>11</td><td>50.00</td><td>0.00</td><td>154.95</td><td>48.00</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>46</td><td>Issa Tandjigora</td><td>20/09/2026 au 26/09/2026</td><td>201.33</td><td>0.00</td><td>0.00</td><td>201.33</td><td>9</td><td>50.00</td><td>0.00</td><td>103.46</td><td>47.87</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>47</td><td>Ousmane Sylla</td><td>20/09/2026 au 26/09/2026</td><td>123.35</td><td>0.00</td><td>0.00</td><td>123.35</td><td>6</td><td>50.00</td><td>0.00</td><td>31.89</td><td>41.46</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>48</td><td>Khalid Okeil</td><td>20/09/2026 au 26/09/2026</td><td>34.13</td><td>57.01</td><td>0.00</td><td>91.14</td><td>5</td><td>50.00</td><td>0.00</td><td>0.00</td><td>41.14</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>49</td><td>Asma Kissi</td><td>20/09/2026 au 26/09/2026</td><td>80.12</td><td>0.00</td><td>0.00</td><td>80.12</td><td>4</td><td>50.00</td><td>0.00</td><td>0.00</td><td>30.12</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>50</td><td>Daba Gandega</td><td>20/09/2026 au 26/09/2026</td><td>91.78</td><td>0.00</td><td>0.00</td><td>91.78</td><td>4</td><td>50.00</td><td>0.00</td><td>32.69</td><td>9.09</td><td>Virement SEPA</td><td>Prêt pour Virement</td>
+              </tr>
+            
+              <tr>
+                <td>51</td><td>Aina Raharimanantsoa</td><td>20/09/2026 au 26/09/2026</td><td>1.00</td><td>0.00</td><td>0.00</td><td>1.00</td><td>1</td><td>1.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>Virement SEPA</td><td>Équilibré</td>
+              </tr>
+            
+              <tr>
+                <td>52</td><td>Raed Loghmari</td><td>20/09/2026 au 26/09/2026</td><td>28.06</td><td>440.31</td><td>0.00</td><td>468.37</td><td>23</td><td>60.00</td><td>0.00</td><td>423.54</td><td>-15.17</td><td>Virement SEPA</td><td>Dette Chauffeur (Espèces)</td>
+              </tr>
+            
+              <tr>
+                <td>53</td><td>Abdoul Azize Mohamed Safir</td><td>20/09/2026 au 26/09/2026</td><td>101.56</td><td>169.84</td><td>0.00</td><td>271.40</td><td>13</td><td>70.00</td><td>0.00</td><td>285.54</td><td>-84.14</td><td>Virement SEPA</td><td>Dette Chauffeur (Espèces)</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      </div>
+      <textarea id="tab-synthese-tsv" style="display:none;">﻿N°	Chauffeur	Période	Chiffre Uber (€)	Chiffre Bolt (€)	Chiffre Heetch (€)	TOTAL BRUT Semaine (€)	Courses	Argent pris (Redevance Flotte) (€)	Déduction Location (€)	Déduction Espèces Encaissées (€)	NET TOTAL À VERSER (€)	Mode Paiement	Statut
+1	Siré Niakaté	20/09/2026 au 26/09/2026	1696.78	315.05	0.00	2011.83	93	50.00	0.00	526.14	1435.69	Virement SEPA	Prêt pour Virement
+2	Mohamed El Khabazi	20/09/2026 au 26/09/2026	1344.86	259.16	0.00	1604.02	74	50.00	0.00	224.82	1329.20	Virement SEPA	Prêt pour Virement
+3	Ali Alouani	20/09/2026 au 26/09/2026	994.20	946.24	0.00	1940.44	92	50.00	0.00	600.23	1290.21	Virement SEPA	Prêt pour Virement
+4	Ziaed Hamila	20/09/2026 au 26/09/2026	572.30	628.00	0.00	1200.30	57	50.00	0.00	0.00	1150.30	Virement SEPA	Prêt pour Virement
+5	Ali Kara	20/09/2026 au 26/09/2026	615.32	573.01	0.00	1188.33	57	40.00	0.00	0.00	1148.33	Virement SEPA	Prêt pour Virement
+6	Abdel Mouamane Chelaif	20/09/2026 au 26/09/2026	1122.41	63.67	0.00	1186.08	54	50.00	0.00	0.00	1136.08	Virement SEPA	Prêt pour Virement
+7	Sofiane Akli	20/09/2026 au 26/09/2026	1325.70	0.00	0.00	1325.70	60	50.00	0.00	180.23	1095.47	Virement SEPA	Prêt pour Virement
+8	Abdallah Hamzi	20/09/2026 au 26/09/2026	1073.08	0.00	0.00	1073.08	49	70.00	0.00	0.00	1003.08	Virement SEPA	Prêt pour Virement
+9	Fathia Boufalgha	20/09/2026 au 26/09/2026	1294.48	0.00	0.00	1294.48	59	50.00	0.00	271.88	972.60	Virement SEPA	Prêt pour Virement
+10	Abdelaziz Guerfi	20/09/2026 au 26/09/2026	1061.47	0.00	0.00	1061.47	48	50.00	0.00	99.77	911.70	Virement SEPA	Prêt pour Virement
+11	Aymen Ltifi	20/09/2026 au 26/09/2026	1039.45	86.56	0.00	1126.01	51	50.00	0.00	186.96	889.05	Virement SEPA	Prêt pour Virement
+12	Ryan Challab	20/09/2026 au 26/09/2026	853.61	131.66	0.00	985.27	46	50.00	0.00	49.88	885.39	Virement SEPA	Prêt pour Virement
+13	Mohamed Aloui	20/09/2026 au 26/09/2026	551.80	504.12	8.20	1064.12	51	70.00	0.00	125.98	868.14	Virement SEPA	Prêt pour Virement
+14	Mourad Bouakkaz	20/09/2026 au 26/09/2026	917.56	0.00	0.00	917.56	42	50.00	0.00	142.41	725.15	Virement SEPA	Prêt pour Virement
+15	Robert-ionut Neagu	20/09/2026 au 26/09/2026	620.80	182.57	51.13	854.50	40	50.00	0.00	122.10	682.40	Virement SEPA	Prêt pour Virement
+16	Bouchaib Belkharras	20/09/2026 au 26/09/2026	371.66	568.92	0.00	940.58	45	60.00	0.00	227.02	653.56	Virement SEPA	Prêt pour Virement
+17	Noureddine Tattouche	20/09/2026 au 26/09/2026	641.71	280.04	0.00	921.75	43	50.00	0.00	222.86	648.89	Virement SEPA	Prêt pour Virement
+18	Mohammed Adel Benabdelouahed	20/09/2026 au 26/09/2026	642.95	201.48	0.00	844.43	39	50.00	0.00	146.11	648.32	Virement SEPA	Prêt pour Virement
+19	Mehdi Bouchnag	20/09/2026 au 26/09/2026	684.26	100.64	0.00	784.90	36	50.00	0.00	112.60	622.30	Virement SEPA	Prêt pour Virement
+20	Foued Karoui	20/09/2026 au 26/09/2026	460.35	238.33	0.00	698.68	33	50.00	0.00	44.85	603.83	Virement SEPA	Prêt pour Virement
+21	Younoussa Bah	20/09/2026 au 26/09/2026	781.45	0.00	0.00	781.45	36	50.00	0.00	128.21	603.24	Virement SEPA	Prêt pour Virement
+22	Brahim Aloui	20/09/2026 au 26/09/2026	505.01	223.84	0.00	728.85	34	70.00	0.00	77.34	581.51	Virement SEPA	Prêt pour Virement
+23	Faical Jabri	20/09/2026 au 26/09/2026	763.73	0.00	0.00	763.73	35	50.00	0.00	135.15	578.58	Virement SEPA	Prêt pour Virement
+24	Christopher Andrew Mongis	20/09/2026 au 26/09/2026	680.49	0.00	0.00	680.49	31	50.00	0.00	74.52	555.97	Virement SEPA	Prêt pour Virement
+25	Ramzi Khannoussi	20/09/2026 au 26/09/2026	438.78	372.83	0.00	811.61	39	50.00	0.00	240.62	520.99	Virement SEPA	Prêt pour Virement
+26	Karim Sidibe	20/09/2026 au 26/09/2026	730.77	0.00	0.00	730.77	33	50.00	0.00	181.43	499.34	Virement SEPA	Prêt pour Virement
+27	Rachid Chinoune	20/09/2026 au 26/09/2026	428.80	163.42	0.00	592.22	27	70.00	0.00	85.36	436.86	Virement SEPA	Prêt pour Virement
+28	Ahmed Kherfouche	20/09/2026 au 26/09/2026	536.50	0.00	0.00	536.50	24	50.00	0.00	61.92	424.58	Virement SEPA	Prêt pour Virement
+29	Bechir Ben Smida	20/09/2026 au 26/09/2026	562.18	0.00	0.00	562.18	26	70.00	0.00	76.97	415.21	Virement SEPA	Prêt pour Virement
+30	Imane Sarraj	20/09/2026 au 26/09/2026	460.61	150.36	0.00	610.97	29	60.00	0.00	162.32	388.65	Virement SEPA	Prêt pour Virement
+31	Brandon Jean Jimmy Louissaint	20/09/2026 au 26/09/2026	252.52	816.44	25.20	1094.16	53	0.00	360.00	353.22	380.94	Virement SEPA	Prêt pour Virement
+32	Raoul Mansfeld Bemma	20/09/2026 au 26/09/2026	433.87	0.00	0.00	433.87	20	60.00	0.00	0.00	373.87	Virement SEPA	Prêt pour Virement
+33	Mehmet Ergun	20/09/2026 au 26/09/2026	230.10	353.33	0.00	583.43	28	60.00	0.00	191.38	332.05	Virement SEPA	Prêt pour Virement
+34	Zahia Guesri	20/09/2026 au 26/09/2026	156.32	347.78	0.00	504.10	24	50.00	0.00	146.37	307.73	Virement SEPA	Prêt pour Virement
+35	Mohamed Fehdi Ben Fekih	20/09/2026 au 26/09/2026	324.96	145.16	45.92	516.04	25	50.00	0.00	183.96	282.08	Virement SEPA	Prêt pour Virement
+36	Omar Chemkhi	20/09/2026 au 26/09/2026	288.97	0.00	0.00	288.97	13	50.00	0.00	12.93	226.04	Virement SEPA	Prêt pour Virement
+37	Haythem Dhifi	20/09/2026 au 26/09/2026	105.87	267.25	0.00	373.12	18	60.00	0.00	123.10	190.02	Virement SEPA	Prêt pour Virement
+38	Youcef Kherfouche	20/09/2026 au 26/09/2026	122.45	298.16	0.00	420.61	21	50.00	0.00	182.20	188.41	Virement SEPA	Prêt pour Virement
+39	Bryan Grégory Michaud	20/09/2026 au 26/09/2026	100.45	179.65	0.00	280.10	14	50.00	0.00	62.50	167.60	Virement SEPA	Prêt pour Virement
+40	Adam Machtou	20/09/2026 au 26/09/2026	0.00	237.18	0.00	237.18	12	50.00	0.00	23.40	163.78	Virement SEPA	Prêt pour Virement
+41	Rayen Klai	20/09/2026 au 26/09/2026	66.15	149.57	0.00	215.72	10	0.00	0.00	52.17	163.55	Virement SEPA	Prêt pour Virement
+42	Mohamed Bayrem Allagui	20/09/2026 au 26/09/2026	0.00	509.56	39.12	548.68	27	50.00	0.00	348.30	150.38	Virement SEPA	Prêt pour Virement
+43	Samir Laazibi	20/09/2026 au 26/09/2026	245.42	9.73	0.00	255.15	12	50.00	0.00	60.64	144.51	Virement SEPA	Prêt pour Virement
+44	Ratiba Guesri	20/09/2026 au 26/09/2026	132.03	301.45	0.00	433.48	21	50.00	0.00	318.84	64.64	Virement SEPA	Prêt pour Virement
+45	Farid Adkhis	20/09/2026 au 26/09/2026	252.95	0.00	0.00	252.95	11	50.00	0.00	154.95	48.00	Virement SEPA	Prêt pour Virement
+46	Issa Tandjigora	20/09/2026 au 26/09/2026	201.33	0.00	0.00	201.33	9	50.00	0.00	103.46	47.87	Virement SEPA	Prêt pour Virement
+47	Ousmane Sylla	20/09/2026 au 26/09/2026	123.35	0.00	0.00	123.35	6	50.00	0.00	31.89	41.46	Virement SEPA	Prêt pour Virement
+48	Khalid Okeil	20/09/2026 au 26/09/2026	34.13	57.01	0.00	91.14	5	50.00	0.00	0.00	41.14	Virement SEPA	Prêt pour Virement
+49	Asma Kissi	20/09/2026 au 26/09/2026	80.12	0.00	0.00	80.12	4	50.00	0.00	0.00	30.12	Virement SEPA	Prêt pour Virement
+50	Daba Gandega	20/09/2026 au 26/09/2026	91.78	0.00	0.00	91.78	4	50.00	0.00	32.69	9.09	Virement SEPA	Prêt pour Virement
+51	Aina Raharimanantsoa	20/09/2026 au 26/09/2026	1.00	0.00	0.00	1.00	1	1.00	0.00	0.00	0.00	Virement SEPA	Équilibré
+52	Raed Loghmari	20/09/2026 au 26/09/2026	28.06	440.31	0.00	468.37	23	60.00	0.00	423.54	-15.17	Virement SEPA	Dette Chauffeur (Espèces)
+53	Abdoul Azize Mohamed Safir	20/09/2026 au 26/09/2026	101.56	169.84	0.00	271.40	13	70.00	0.00	285.54	-84.14	Virement SEPA	Dette Chauffeur (Espèces)</textarea>
+    </div>
+  
+    <div id="tab-qonto" class="panel ">
+      
+        <div class="qonto-notice">
+          <div>
+            <strong>💡 Format Virement Qonto :</strong> Ce tableau contient pour chaque chauffeur son montant Net exact à virer. Le fichier <code>Qonto_Import_Virements_S32.csv</code> peut être importé directement dans <em>Qonto > Virements > Virement multiple CSV</em>.
+          </div>
+          <a href="Qonto_Import_Virements_S32.csv" download class="btn-qonto" style="padding: 6px 12px; font-size: 12px;">
+            📥 Télécharger CSV Qonto
+          </a>
+        </div>
+      
+
+      <div class="actions-bar">
+        <div>
+          <button class="btn-copy" onclick="copyTable('tab-qonto-tsv', 'alert-tab-qonto')">
+            📋 Copier cet onglet pour Google Sheets (Ctrl+C direct)
+          </button>
+          <span id="alert-tab-qonto" class="copy-alert">✓ Copié dans le presse-papier ! Faites Ctrl+V dans Google Sheets</span>
+        </div>
+        <div style="color: var(--text-muted); font-size: 13px;">
+          Fichier généré : <code>Qonto_Import_Virements_S32.csv</code> (50 lignes)
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>N°</th><th>Nom du bénéficiaire</th><th>IBAN</th><th>BIC</th><th>Montant (€)</th><th>Devise</th><th>Référence du virement</th><th>Date exécution</th><th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>1</td><td>Siré Niakaté</td><td></td><td></td><td>1435.69</td><td>EUR</td><td>Paie Nordrive S39 - Siré Niakaté</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>2</td><td>Mohamed El Khabazi</td><td></td><td></td><td>1329.20</td><td>EUR</td><td>Paie Nordrive S39 - Mohamed El Khab</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>3</td><td>Ali Alouani</td><td></td><td></td><td>1290.21</td><td>EUR</td><td>Paie Nordrive S39 - Ali Alouani</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>4</td><td>Ziaed Hamila</td><td></td><td></td><td>1150.30</td><td>EUR</td><td>Paie Nordrive S39 - Ziaed Hamila</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>5</td><td>Ali Kara</td><td></td><td></td><td>1148.33</td><td>EUR</td><td>Paie Nordrive S39 - Ali Kara</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>6</td><td>Abdel Mouamane Chelaif</td><td></td><td></td><td>1136.08</td><td>EUR</td><td>Paie Nordrive S39 - Abdel Mouamane </td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>7</td><td>Sofiane Akli</td><td></td><td></td><td>1095.47</td><td>EUR</td><td>Paie Nordrive S39 - Sofiane Akli</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>8</td><td>Abdallah Hamzi</td><td></td><td></td><td>1003.08</td><td>EUR</td><td>Paie Nordrive S39 - Abdallah Hamzi</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>9</td><td>Fathia Boufalgha</td><td></td><td></td><td>972.60</td><td>EUR</td><td>Paie Nordrive S39 - Fathia Boufalgh</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>10</td><td>Abdelaziz Guerfi</td><td></td><td></td><td>911.70</td><td>EUR</td><td>Paie Nordrive S39 - Abdelaziz Guerf</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>11</td><td>Aymen Ltifi</td><td></td><td></td><td>889.05</td><td>EUR</td><td>Paie Nordrive S39 - Aymen Ltifi</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>12</td><td>Ryan Challab</td><td></td><td></td><td>885.39</td><td>EUR</td><td>Paie Nordrive S39 - Ryan Challab</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>13</td><td>Mohamed Aloui</td><td></td><td></td><td>868.14</td><td>EUR</td><td>Paie Nordrive S39 - Mohamed Aloui</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>14</td><td>Mourad Bouakkaz</td><td></td><td></td><td>725.15</td><td>EUR</td><td>Paie Nordrive S39 - Mourad Bouakkaz</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>15</td><td>Robert-ionut Neagu</td><td></td><td></td><td>682.40</td><td>EUR</td><td>Paie Nordrive S39 - Robert-ionut Ne</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>16</td><td>Bouchaib Belkharras</td><td></td><td></td><td>653.56</td><td>EUR</td><td>Paie Nordrive S39 - Bouchaib Belkha</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>17</td><td>Noureddine Tattouche</td><td></td><td></td><td>648.89</td><td>EUR</td><td>Paie Nordrive S39 - Noureddine Tatt</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>18</td><td>Mohammed Adel Benabdelouahed</td><td></td><td></td><td>648.32</td><td>EUR</td><td>Paie Nordrive S39 - Mohammed Adel B</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>19</td><td>Mehdi Bouchnag</td><td></td><td></td><td>622.30</td><td>EUR</td><td>Paie Nordrive S39 - Mehdi Bouchnag</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>20</td><td>Foued Karoui</td><td></td><td></td><td>603.83</td><td>EUR</td><td>Paie Nordrive S39 - Foued Karoui</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>21</td><td>Younoussa Bah</td><td></td><td></td><td>603.24</td><td>EUR</td><td>Paie Nordrive S39 - Younoussa Bah</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>22</td><td>Brahim Aloui</td><td></td><td></td><td>581.51</td><td>EUR</td><td>Paie Nordrive S39 - Brahim Aloui</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>23</td><td>Faical Jabri</td><td></td><td></td><td>578.58</td><td>EUR</td><td>Paie Nordrive S39 - Faical Jabri</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>24</td><td>Christopher Andrew Mongis</td><td></td><td></td><td>555.97</td><td>EUR</td><td>Paie Nordrive S39 - Christopher And</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>25</td><td>Ramzi Khannoussi</td><td></td><td></td><td>520.99</td><td>EUR</td><td>Paie Nordrive S39 - Ramzi Khannouss</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>26</td><td>Karim Sidibe</td><td></td><td></td><td>499.34</td><td>EUR</td><td>Paie Nordrive S39 - Karim Sidibe</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>27</td><td>Rachid Chinoune</td><td></td><td></td><td>436.86</td><td>EUR</td><td>Paie Nordrive S39 - Rachid Chinoune</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>28</td><td>Ahmed Kherfouche</td><td></td><td></td><td>424.58</td><td>EUR</td><td>Paie Nordrive S39 - Ahmed Kherfouch</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>29</td><td>Bechir Ben Smida</td><td></td><td></td><td>415.21</td><td>EUR</td><td>Paie Nordrive S39 - Bechir Ben Smid</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>30</td><td>Imane Sarraj</td><td></td><td></td><td>388.65</td><td>EUR</td><td>Paie Nordrive S39 - Imane Sarraj</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>31</td><td>Brandon Jean Jimmy Louissaint</td><td></td><td></td><td>380.94</td><td>EUR</td><td>Paie Nordrive S39 - Brandon Jean Ji</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>32</td><td>Raoul Mansfeld Bemma</td><td></td><td></td><td>373.87</td><td>EUR</td><td>Paie Nordrive S39 - Raoul Mansfeld </td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>33</td><td>Mehmet Ergun</td><td></td><td></td><td>332.05</td><td>EUR</td><td>Paie Nordrive S39 - Mehmet Ergun</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>34</td><td>Zahia Guesri</td><td></td><td></td><td>307.73</td><td>EUR</td><td>Paie Nordrive S39 - Zahia Guesri</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>35</td><td>Mohamed Fehdi Ben Fekih</td><td></td><td></td><td>282.08</td><td>EUR</td><td>Paie Nordrive S39 - Mohamed Fehdi B</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>36</td><td>Omar Chemkhi</td><td></td><td></td><td>226.04</td><td>EUR</td><td>Paie Nordrive S39 - Omar Chemkhi</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>37</td><td>Haythem Dhifi</td><td></td><td></td><td>190.02</td><td>EUR</td><td>Paie Nordrive S39 - Haythem Dhifi</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>38</td><td>Youcef Kherfouche</td><td></td><td></td><td>188.41</td><td>EUR</td><td>Paie Nordrive S39 - Youcef Kherfouc</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>39</td><td>Bryan Grégory Michaud</td><td></td><td></td><td>167.60</td><td>EUR</td><td>Paie Nordrive S39 - Bryan Grégory M</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>40</td><td>Adam Machtou</td><td></td><td></td><td>163.78</td><td>EUR</td><td>Paie Nordrive S39 - Adam Machtou</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>41</td><td>Rayen Klai</td><td></td><td></td><td>163.55</td><td>EUR</td><td>Paie Nordrive S39 - Rayen Klai</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>42</td><td>Mohamed Bayrem Allagui</td><td></td><td></td><td>150.38</td><td>EUR</td><td>Paie Nordrive S39 - Mohamed Bayrem </td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>43</td><td>Samir Laazibi</td><td></td><td></td><td>144.51</td><td>EUR</td><td>Paie Nordrive S39 - Samir Laazibi</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>44</td><td>Ratiba Guesri</td><td></td><td></td><td>64.64</td><td>EUR</td><td>Paie Nordrive S39 - Ratiba Guesri</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>45</td><td>Farid Adkhis</td><td></td><td></td><td>48.00</td><td>EUR</td><td>Paie Nordrive S39 - Farid Adkhis</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>46</td><td>Issa Tandjigora</td><td></td><td></td><td>47.87</td><td>EUR</td><td>Paie Nordrive S39 - Issa Tandjigora</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>47</td><td>Ousmane Sylla</td><td></td><td></td><td>41.46</td><td>EUR</td><td>Paie Nordrive S39 - Ousmane Sylla</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>48</td><td>Khalid Okeil</td><td></td><td></td><td>41.14</td><td>EUR</td><td>Paie Nordrive S39 - Khalid Okeil</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>49</td><td>Asma Kissi</td><td></td><td></td><td>30.12</td><td>EUR</td><td>Paie Nordrive S39 - Asma Kissi</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+              <tr>
+                <td>50</td><td>Daba Gandega</td><td></td><td></td><td>9.09</td><td>EUR</td><td>Paie Nordrive S39 - Daba Gandega</td><td>28/09/2026</td><td>En attente IBAN</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      </div>
+      <textarea id="tab-qonto-tsv" style="display:none;">﻿N°	Nom du bénéficiaire	IBAN	BIC	Montant (€)	Devise	Référence du virement	Date exécution	Statut
+1	Siré Niakaté			1435.69	EUR	Paie Nordrive S39 - Siré Niakaté	28/09/2026	En attente IBAN
+2	Mohamed El Khabazi			1329.20	EUR	Paie Nordrive S39 - Mohamed El Khab	28/09/2026	En attente IBAN
+3	Ali Alouani			1290.21	EUR	Paie Nordrive S39 - Ali Alouani	28/09/2026	En attente IBAN
+4	Ziaed Hamila			1150.30	EUR	Paie Nordrive S39 - Ziaed Hamila	28/09/2026	En attente IBAN
+5	Ali Kara			1148.33	EUR	Paie Nordrive S39 - Ali Kara	28/09/2026	En attente IBAN
+6	Abdel Mouamane Chelaif			1136.08	EUR	Paie Nordrive S39 - Abdel Mouamane 	28/09/2026	En attente IBAN
+7	Sofiane Akli			1095.47	EUR	Paie Nordrive S39 - Sofiane Akli	28/09/2026	En attente IBAN
+8	Abdallah Hamzi			1003.08	EUR	Paie Nordrive S39 - Abdallah Hamzi	28/09/2026	En attente IBAN
+9	Fathia Boufalgha			972.60	EUR	Paie Nordrive S39 - Fathia Boufalgh	28/09/2026	En attente IBAN
+10	Abdelaziz Guerfi			911.70	EUR	Paie Nordrive S39 - Abdelaziz Guerf	28/09/2026	En attente IBAN
+11	Aymen Ltifi			889.05	EUR	Paie Nordrive S39 - Aymen Ltifi	28/09/2026	En attente IBAN
+12	Ryan Challab			885.39	EUR	Paie Nordrive S39 - Ryan Challab	28/09/2026	En attente IBAN
+13	Mohamed Aloui			868.14	EUR	Paie Nordrive S39 - Mohamed Aloui	28/09/2026	En attente IBAN
+14	Mourad Bouakkaz			725.15	EUR	Paie Nordrive S39 - Mourad Bouakkaz	28/09/2026	En attente IBAN
+15	Robert-ionut Neagu			682.40	EUR	Paie Nordrive S39 - Robert-ionut Ne	28/09/2026	En attente IBAN
+16	Bouchaib Belkharras			653.56	EUR	Paie Nordrive S39 - Bouchaib Belkha	28/09/2026	En attente IBAN
+17	Noureddine Tattouche			648.89	EUR	Paie Nordrive S39 - Noureddine Tatt	28/09/2026	En attente IBAN
+18	Mohammed Adel Benabdelouahed			648.32	EUR	Paie Nordrive S39 - Mohammed Adel B	28/09/2026	En attente IBAN
+19	Mehdi Bouchnag			622.30	EUR	Paie Nordrive S39 - Mehdi Bouchnag	28/09/2026	En attente IBAN
+20	Foued Karoui			603.83	EUR	Paie Nordrive S39 - Foued Karoui	28/09/2026	En attente IBAN
+21	Younoussa Bah			603.24	EUR	Paie Nordrive S39 - Younoussa Bah	28/09/2026	En attente IBAN
+22	Brahim Aloui			581.51	EUR	Paie Nordrive S39 - Brahim Aloui	28/09/2026	En attente IBAN
+23	Faical Jabri			578.58	EUR	Paie Nordrive S39 - Faical Jabri	28/09/2026	En attente IBAN
+24	Christopher Andrew Mongis			555.97	EUR	Paie Nordrive S39 - Christopher And	28/09/2026	En attente IBAN
+25	Ramzi Khannoussi			520.99	EUR	Paie Nordrive S39 - Ramzi Khannouss	28/09/2026	En attente IBAN
+26	Karim Sidibe			499.34	EUR	Paie Nordrive S39 - Karim Sidibe	28/09/2026	En attente IBAN
+27	Rachid Chinoune			436.86	EUR	Paie Nordrive S39 - Rachid Chinoune	28/09/2026	En attente IBAN
+28	Ahmed Kherfouche			424.58	EUR	Paie Nordrive S39 - Ahmed Kherfouch	28/09/2026	En attente IBAN
+29	Bechir Ben Smida			415.21	EUR	Paie Nordrive S39 - Bechir Ben Smid	28/09/2026	En attente IBAN
+30	Imane Sarraj			388.65	EUR	Paie Nordrive S39 - Imane Sarraj	28/09/2026	En attente IBAN
+31	Brandon Jean Jimmy Louissaint			380.94	EUR	Paie Nordrive S39 - Brandon Jean Ji	28/09/2026	En attente IBAN
+32	Raoul Mansfeld Bemma			373.87	EUR	Paie Nordrive S39 - Raoul Mansfeld 	28/09/2026	En attente IBAN
+33	Mehmet Ergun			332.05	EUR	Paie Nordrive S39 - Mehmet Ergun	28/09/2026	En attente IBAN
+34	Zahia Guesri			307.73	EUR	Paie Nordrive S39 - Zahia Guesri	28/09/2026	En attente IBAN
+35	Mohamed Fehdi Ben Fekih			282.08	EUR	Paie Nordrive S39 - Mohamed Fehdi B	28/09/2026	En attente IBAN
+36	Omar Chemkhi			226.04	EUR	Paie Nordrive S39 - Omar Chemkhi	28/09/2026	En attente IBAN
+37	Haythem Dhifi			190.02	EUR	Paie Nordrive S39 - Haythem Dhifi	28/09/2026	En attente IBAN
+38	Youcef Kherfouche			188.41	EUR	Paie Nordrive S39 - Youcef Kherfouc	28/09/2026	En attente IBAN
+39	Bryan Grégory Michaud			167.60	EUR	Paie Nordrive S39 - Bryan Grégory M	28/09/2026	En attente IBAN
+40	Adam Machtou			163.78	EUR	Paie Nordrive S39 - Adam Machtou	28/09/2026	En attente IBAN
+41	Rayen Klai			163.55	EUR	Paie Nordrive S39 - Rayen Klai	28/09/2026	En attente IBAN
+42	Mohamed Bayrem Allagui			150.38	EUR	Paie Nordrive S39 - Mohamed Bayrem 	28/09/2026	En attente IBAN
+43	Samir Laazibi			144.51	EUR	Paie Nordrive S39 - Samir Laazibi	28/09/2026	En attente IBAN
+44	Ratiba Guesri			64.64	EUR	Paie Nordrive S39 - Ratiba Guesri	28/09/2026	En attente IBAN
+45	Farid Adkhis			48.00	EUR	Paie Nordrive S39 - Farid Adkhis	28/09/2026	En attente IBAN
+46	Issa Tandjigora			47.87	EUR	Paie Nordrive S39 - Issa Tandjigora	28/09/2026	En attente IBAN
+47	Ousmane Sylla			41.46	EUR	Paie Nordrive S39 - Ousmane Sylla	28/09/2026	En attente IBAN
+48	Khalid Okeil			41.14	EUR	Paie Nordrive S39 - Khalid Okeil	28/09/2026	En attente IBAN
+49	Asma Kissi			30.12	EUR	Paie Nordrive S39 - Asma Kissi	28/09/2026	En attente IBAN
+50	Daba Gandega			9.09	EUR	Paie Nordrive S39 - Daba Gandega	28/09/2026	En attente IBAN</textarea>
+    </div>
+  
+    <div id="tab-uber" class="panel ">
+      
+
+      <div class="actions-bar">
+        <div>
+          <button class="btn-copy" onclick="copyTable('tab-uber-tsv', 'alert-tab-uber')">
+            📋 Copier cet onglet pour Google Sheets (Ctrl+C direct)
+          </button>
+          <span id="alert-tab-uber" class="copy-alert">✓ Copié dans le presse-papier ! Faites Ctrl+V dans Google Sheets</span>
+        </div>
+        <div style="color: var(--text-muted); font-size: 13px;">
+          Fichier généré : <code>GoogleSheets_Uber_Semaine.csv</code> (52 lignes)
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>UUID du chauffeur</th><th>Prénom du chauffeur</th><th>Nom du chauffeur</th><th>Revenus totaux</th><th>Revenus totaux : Prix net de la course</th><th>Revenus totaux : Bonus</th><th>Remboursements et notes de frais</th><th>Versements</th><th>Versements : Transferts vers un compte bancaire</th><th>Versements : Espèces collectées</th><th>Montant versé à Uber</th><th>Montant versé à Uber:Frais de réservation</th><th>Remboursements et notes de frais:Remboursements:Péage</th><th>Revenus totaux:Pourboire</th><th>Revenus totaux:Autres revenus:Retour d'un objet oublié</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>cadfccc3-9db9-4c32-bbf9-72ba92144aa8</td><td>Raed</td><td>Loghmari</td><td>28.06</td><td>27.94</td><td>0.12</td><td></td><td>-12.94</td><td></td><td>-12.94</td><td></td><td></td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>e39f0ec7-249a-4d20-a228-c5182e032e26</td><td>AINA</td><td>RAHARIMANANTSOA</td><td>1.00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>1.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>bce74b3a-5d74-4cb9-ab0a-c6746f1ccdd8</td><td>rachid</td><td>CHINOUNE</td><td>428.80</td><td>388.46</td><td>29.47</td><td></td><td>-85.36</td><td></td><td>-85.36</td><td>-0.32</td><td>-0.32</td><td></td><td>10.87</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>e53dc586-b4b6-4cba-9a6e-8ba2176e56c5</td><td>Bouchaib</td><td>Belkharras</td><td>371.66</td><td>353.54</td><td>10.50</td><td></td><td>-49.02</td><td></td><td>-49.02</td><td>-0.12</td><td>-0.12</td><td></td><td>7.62</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>187b8b07-85d6-4eeb-a866-cb8e3e477a54</td><td>Farid</td><td>Adkhis</td><td>252.95</td><td>251.85</td><td>1.10</td><td></td><td>-154.95</td><td></td><td>-154.95</td><td>-0.04</td><td>-0.04</td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>705b20fb-6418-46eb-b0cb-189185267480</td><td>ABDALLAH</td><td>HAMZI</td><td>1073.08</td><td>1055.85</td><td>7.61</td><td></td><td></td><td></td><td></td><td>-0.24</td><td>-0.24</td><td></td><td>9.62</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>ba779469-ba34-4105-ae7e-5da93a3217f9</td><td>Robert-Ionut</td><td>Neagu</td><td>620.80</td><td>602.72</td><td>3.96</td><td></td><td></td><td></td><td></td><td>-0.16</td><td>-0.16</td><td></td><td>14.12</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>9a0132ce-06c1-4d0f-82bd-f485d1b7479b</td><td>ISSA</td><td>TANDJIGORA</td><td>201.33</td><td>200.14</td><td>0.31</td><td></td><td>-103.46</td><td></td><td>-103.46</td><td></td><td></td><td></td><td>0.88</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>39e958a9-e12f-4199-ba5a-460c3e2d9187</td><td>Omar</td><td>Chemkhi</td><td>288.97</td><td>284.04</td><td>1.93</td><td></td><td>-12.93</td><td></td><td>-12.93</td><td>-0.40</td><td>-0.40</td><td></td><td>3.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>44575ef7-0936-445e-9dad-2325f7d54d1f</td><td>Noureddine</td><td>Tattouche</td><td>641.71</td><td>634.38</td><td>2.33</td><td></td><td>-136.36</td><td></td><td>-136.36</td><td>-0.20</td><td>-0.20</td><td></td><td>5.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>4afc3041-1d5f-48ca-976b-6e56d4e71b8d</td><td>Youcef</td><td>Kherfouche</td><td>122.45</td><td>121.58</td><td>0.87</td><td></td><td></td><td></td><td></td><td>-0.04</td><td>-0.04</td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>31da3c25-4390-499d-bc4e-e950d3f52808</td><td>FOUED</td><td>KAROUI</td><td>460.35</td><td>457.51</td><td>2.84</td><td></td><td>-44.85</td><td></td><td>-44.85</td><td>-0.04</td><td>-0.04</td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>59899875-c5d2-40a1-996e-1277a84e76ed</td><td>MOHAMED FEHDI</td><td>BEN-FEKIH</td><td>324.96</td><td>311.74</td><td>3.22</td><td></td><td>-73.06</td><td></td><td>-73.06</td><td></td><td></td><td></td><td>10.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>c301c784-1c1d-44fd-8106-615e30556e7e</td><td>ZIAED</td><td>HAMILA</td><td>572.30</td><td>559.51</td><td>9.79</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>3.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>ce4ca592-3925-46e2-8fcb-326ac5f81577</td><td>Haythem</td><td>Dhifi</td><td>105.87</td><td>105.74</td><td>0.13</td><td></td><td></td><td></td><td></td><td>-0.08</td><td>-0.08</td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>2d271984-777e-4942-8f22-6c20d8d00036</td><td>Christopher Andrew</td><td>Mongis</td><td>680.49</td><td>676.12</td><td>4.37</td><td></td><td>-74.52</td><td></td><td>-74.52</td><td>-0.12</td><td>-0.12</td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>581f0c82-a5b6-4157-9e93-37b2ad6f35e6</td><td>ADEL</td><td>BENABDELOUAHED</td><td>642.95</td><td>620.10</td><td>4.50</td><td></td><td>-67.91</td><td></td><td>-67.91</td><td>-0.24</td><td>-0.24</td><td></td><td>18.35</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>983c63ed-2f31-43bd-b79f-b677ca5065fa</td><td>SIRE CYRIL</td><td>NIAKATE</td><td>1688.69</td><td>1673.61</td><td>10.45</td><td>8.09</td><td>-371.34</td><td></td><td>-371.34</td><td>-0.12</td><td>-0.12</td><td>8.09</td><td>4.63</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>9ee36418-ed86-45bf-ba00-67457101af89</td><td>Imane</td><td>Sarraj</td><td>460.61</td><td>453.67</td><td>1.94</td><td></td><td>-101.82</td><td></td><td>-101.82</td><td>-0.28</td><td>-0.28</td><td></td><td>5.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>e476a2ba-2a1b-43c9-bbc4-cf7e93c83986</td><td>Ali</td><td>Alouani</td><td>994.20</td><td>972.86</td><td>8.33</td><td></td><td>-107.83</td><td></td><td>-107.83</td><td>-0.16</td><td>-0.16</td><td></td><td>13.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>aaab1c40-042f-4a3c-916b-e6b59e4c0f44</td><td>Sofiane</td><td>Akli</td><td>1325.70</td><td>1238.63</td><td>56.63</td><td></td><td>-180.23</td><td></td><td>-180.23</td><td>-0.08</td><td>-0.08</td><td></td><td>30.44</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>8306d593-37dd-4c92-b152-ebf0ca5354b2</td><td>Brahim</td><td>Aloui</td><td>505.01</td><td>497.91</td><td>5.10</td><td></td><td>-42.44</td><td></td><td>-42.44</td><td>-0.28</td><td>-0.28</td><td></td><td>2.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>96060c6f-36f8-4ff9-a6c0-92bc45a19075</td><td>Ahmed</td><td>Kherfouche</td><td>536.50</td><td>527.24</td><td>3.26</td><td></td><td>-61.92</td><td></td><td>-61.92</td><td>-0.08</td><td>-0.08</td><td></td><td>6.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>66310da7-a454-4902-ba89-dc1ea3fa89af</td><td>Karim</td><td>Sidibe</td><td>730.77</td><td>706.97</td><td>23.80</td><td></td><td>-181.43</td><td></td><td>-181.43</td><td>-0.04</td><td>-0.04</td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>d409253e-52f5-4816-9e78-6b890db203cb</td><td>Mourad</td><td>Bouakkaz</td><td>917.56</td><td>876.62</td><td>34.94</td><td></td><td>-142.41</td><td></td><td>-142.41</td><td>-0.24</td><td>-0.24</td><td></td><td>6.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>a53484f4-ce4a-4cbb-9b3a-8652f25c1afa</td><td>Abdelaziz</td><td>Guerfi</td><td>1061.47</td><td>1043.77</td><td>5.91</td><td></td><td>-99.77</td><td></td><td>-99.77</td><td>-0.04</td><td>-0.04</td><td></td><td>11.79</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>3adffadf-6d60-4a2f-a6e3-4ca3ffe3a72c</td><td>YOUNOUSSA</td><td>BAH</td><td>772.08</td><td>767.45</td><td></td><td>9.37</td><td>-128.21</td><td></td><td>-128.21</td><td></td><td></td><td>9.37</td><td>4.63</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>7e6b9ac8-24f0-4325-902e-2631b16f1f54</td><td>Ramzi</td><td>Khannoussi</td><td>438.78</td><td>425.99</td><td>11.79</td><td></td><td>-57.22</td><td></td><td>-57.22</td><td>-0.20</td><td>-0.20</td><td></td><td>1.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>eeffcd94-27a8-4b15-82e4-42996a50bc84</td><td>Rayen</td><td>Klai</td><td>66.15</td><td>66.06</td><td>0.09</td><td></td><td>-13.97</td><td></td><td>-13.97</td><td></td><td></td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>3a100ded-7bc6-48d5-80d6-a84676c2ccd9</td><td>Bilel</td><td>Bouhali</td><td></td><td></td><td></td><td></td><td>-23503.15</td><td>-23503.15</td><td></td><td></td><td></td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>fa89767a-12bb-4a95-b1db-5fb71719a940</td><td>FAICAL</td><td>JABRI</td><td>763.73</td><td>751.73</td><td>9.00</td><td></td><td>-135.15</td><td></td><td>-135.15</td><td>-0.20</td><td>-0.20</td><td></td><td>3.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>771ff113-4690-410d-bc41-5b5ca3bb2040</td><td>Ali</td><td>Kara</td><td>615.32</td><td>588.50</td><td>23.82</td><td></td><td></td><td></td><td></td><td>-0.32</td><td>-0.32</td><td></td><td>3.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>66cfb448-2a87-41ba-97f2-f0bb51b9b165</td><td>FATHIA</td><td>BOUFALGHA</td><td>1294.48</td><td>1270.05</td><td>5.43</td><td></td><td>-271.88</td><td></td><td>-271.88</td><td>-0.32</td><td>-0.32</td><td></td><td>19.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>c3bc3abe-643a-4431-ab51-8c06ede4b462</td><td>ABDOUL AZIZE</td><td>MOHAMED SAFIR</td><td>101.56</td><td>101.56</td><td></td><td></td><td>-103.24</td><td></td><td>-103.24</td><td>-0.04</td><td>-0.04</td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>376a7dae-410e-4a9f-977a-b8d876cbb322</td><td>BRANDON JEAN-JIMMY</td><td>LOUISSAINT</td><td>252.52</td><td>248.40</td><td>2.12</td><td></td><td>-28.12</td><td></td><td>-28.12</td><td>-0.12</td><td>-0.12</td><td></td><td>2.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>4db066f5-f324-4ce7-bc35-6cdc02744ec9</td><td>Bryan Grégory</td><td>Michaud</td><td>100.45</td><td>100.21</td><td>0.24</td><td></td><td></td><td></td><td></td><td>-0.04</td><td>-0.04</td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>bac2a019-9062-4116-9085-6da102d70c5d</td><td>OUSMANE</td><td>SYLLA</td><td>123.35</td><td>123.11</td><td>0.24</td><td></td><td>-31.89</td><td></td><td>-31.89</td><td>-0.04</td><td>-0.04</td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>8f960007-a5d4-4ab4-b73e-224304f9861f</td><td>MEHDI</td><td>BOUCHNAG</td><td>684.26</td><td>666.80</td><td>3.58</td><td></td><td>-112.60</td><td></td><td>-112.60</td><td>-0.24</td><td>-0.24</td><td></td><td>13.88</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>c5fc6a45-db9e-4b52-a26f-407ad04c339e</td><td>Abdel Mouamane</td><td>Chelaif</td><td>1122.41</td><td>1070.22</td><td>30.66</td><td></td><td></td><td></td><td></td><td>-0.40</td><td>-0.40</td><td></td><td>21.53</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>ed046710-cb81-4e10-8981-2408f8f6d7a3</td><td>Samir</td><td>Laazibi</td><td>245.42</td><td>231.97</td><td>13.45</td><td></td><td>-60.64</td><td></td><td>-60.64</td><td></td><td></td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>7ed4458a-eaaa-4e6d-98f6-24871c279a8a</td><td>MEHMET</td><td>ERGUN</td><td>230.10</td><td>229.52</td><td>0.58</td><td></td><td>-25.98</td><td></td><td>-25.98</td><td>-0.08</td><td>-0.08</td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>01e09944-7e3c-456e-87ec-7c45c1b3cc26</td><td>Raoul Mansfeld</td><td>Bemma</td><td>433.87</td><td>419.26</td><td>1.61</td><td></td><td></td><td></td><td></td><td>-0.20</td><td>-0.20</td><td></td><td>13.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>544038a7-0fbf-48ae-b170-b087c5b50353</td><td>Khalid</td><td>Okeil</td><td>34.13</td><td>33.74</td><td>0.39</td><td></td><td></td><td></td><td></td><td>-0.08</td><td>-0.08</td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>5fb339a5-f955-44c6-8a50-6970397bb753</td><td>ASMA</td><td>KISSI</td><td>80.12</td><td>79.75</td><td>0.37</td><td></td><td></td><td></td><td></td><td>-0.04</td><td>-0.04</td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>61931f3a-cf60-42e3-9ef6-52108004b6d6</td><td>Ryan</td><td>Challab</td><td>853.61</td><td>488.56</td><td>322.42</td><td></td><td>-49.88</td><td></td><td>-49.88</td><td>-0.12</td><td>-0.12</td><td></td><td>2.63</td><td>40.00</td>
+              </tr>
+            
+              <tr>
+                <td>9501a412-f396-4d5e-80e6-05d9b3276311</td><td>Mohamed</td><td>El Khabazi</td><td>1344.86</td><td>1331.80</td><td>4.06</td><td></td><td>-140.02</td><td></td><td>-140.02</td><td>-0.44</td><td>-0.44</td><td></td><td>9.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>42bc51e5-9514-4e9d-81ce-e7db3c6a2682</td><td>Aymen</td><td>Ltifi</td><td>1029.63</td><td>1021.46</td><td>6.17</td><td>9.82</td><td>-186.96</td><td></td><td>-186.96</td><td>-0.20</td><td>-0.20</td><td>9.82</td><td>2.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>a60930ad-c1e7-4984-9893-e4bfe2db96b0</td><td>Zahia</td><td>Guesri</td><td>156.32</td><td>151.22</td><td>3.10</td><td></td><td>-28.67</td><td></td><td>-28.67</td><td>-0.03</td><td>-0.03</td><td></td><td>2.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>a0e498bc-3c9b-4c82-bc49-18718ccca9f0</td><td>Bechir</td><td>Ben Smida</td><td>562.18</td><td>557.73</td><td>4.45</td><td></td><td>-76.97</td><td></td><td>-76.97</td><td>-0.16</td><td>-0.16</td><td></td><td></td><td></td>
+              </tr>
+            
+              <tr>
+                <td>c96fdca4-dd00-4532-bdd3-8cbce2d7edb5</td><td>Daba</td><td>Gandega</td><td>91.78</td><td>89.35</td><td>0.43</td><td></td><td>-32.69</td><td></td><td>-32.69</td><td></td><td></td><td></td><td>2.00</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>a2f299ae-f623-4841-935b-52caf47aef66</td><td>MOHAMED</td><td>ALOUi</td><td>551.80</td><td>534.47</td><td>16.46</td><td></td><td>-21.98</td><td></td><td>-21.98</td><td>-0.16</td><td>-0.16</td><td></td><td>0.87</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>e4157312-32c8-469d-b099-30f3b16cbe69</td><td>Ratiba</td><td>Beldjoudi</td><td>132.03</td><td>128.50</td><td>0.53</td><td></td><td>-25.94</td><td></td><td>-25.94</td><td></td><td></td><td></td><td>3.00</td><td></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      </div>
+      <textarea id="tab-uber-tsv" style="display:none;">﻿UUID du chauffeur	Prénom du chauffeur	Nom du chauffeur	Revenus totaux	Revenus totaux : Prix net de la course	Revenus totaux : Bonus	Remboursements et notes de frais	Versements	Versements : Transferts vers un compte bancaire	Versements : Espèces collectées	Montant versé à Uber	Montant versé à Uber:Frais de réservation	Remboursements et notes de frais:Remboursements:Péage	Revenus totaux:Pourboire	Revenus totaux:Autres revenus:Retour d'un objet oublié
+cadfccc3-9db9-4c32-bbf9-72ba92144aa8	Raed	Loghmari	28.06	27.94	0.12		-12.94		-12.94					
+e39f0ec7-249a-4d20-a228-c5182e032e26	AINA	RAHARIMANANTSOA	1.00										1.00	
+bce74b3a-5d74-4cb9-ab0a-c6746f1ccdd8	rachid	CHINOUNE	428.80	388.46	29.47		-85.36		-85.36	-0.32	-0.32		10.87	
+e53dc586-b4b6-4cba-9a6e-8ba2176e56c5	Bouchaib	Belkharras	371.66	353.54	10.50		-49.02		-49.02	-0.12	-0.12		7.62	
+187b8b07-85d6-4eeb-a866-cb8e3e477a54	Farid	Adkhis	252.95	251.85	1.10		-154.95		-154.95	-0.04	-0.04			
+705b20fb-6418-46eb-b0cb-189185267480	ABDALLAH	HAMZI	1073.08	1055.85	7.61					-0.24	-0.24		9.62	
+ba779469-ba34-4105-ae7e-5da93a3217f9	Robert-Ionut	Neagu	620.80	602.72	3.96					-0.16	-0.16		14.12	
+9a0132ce-06c1-4d0f-82bd-f485d1b7479b	ISSA	TANDJIGORA	201.33	200.14	0.31		-103.46		-103.46				0.88	
+39e958a9-e12f-4199-ba5a-460c3e2d9187	Omar	Chemkhi	288.97	284.04	1.93		-12.93		-12.93	-0.40	-0.40		3.00	
+44575ef7-0936-445e-9dad-2325f7d54d1f	Noureddine	Tattouche	641.71	634.38	2.33		-136.36		-136.36	-0.20	-0.20		5.00	
+4afc3041-1d5f-48ca-976b-6e56d4e71b8d	Youcef	Kherfouche	122.45	121.58	0.87					-0.04	-0.04			
+31da3c25-4390-499d-bc4e-e950d3f52808	FOUED	KAROUI	460.35	457.51	2.84		-44.85		-44.85	-0.04	-0.04			
+59899875-c5d2-40a1-996e-1277a84e76ed	MOHAMED FEHDI	BEN-FEKIH	324.96	311.74	3.22		-73.06		-73.06				10.00	
+c301c784-1c1d-44fd-8106-615e30556e7e	ZIAED	HAMILA	572.30	559.51	9.79								3.00	
+ce4ca592-3925-46e2-8fcb-326ac5f81577	Haythem	Dhifi	105.87	105.74	0.13					-0.08	-0.08			
+2d271984-777e-4942-8f22-6c20d8d00036	Christopher Andrew	Mongis	680.49	676.12	4.37		-74.52		-74.52	-0.12	-0.12			
+581f0c82-a5b6-4157-9e93-37b2ad6f35e6	ADEL	BENABDELOUAHED	642.95	620.10	4.50		-67.91		-67.91	-0.24	-0.24		18.35	
+983c63ed-2f31-43bd-b79f-b677ca5065fa	SIRE CYRIL	NIAKATE	1688.69	1673.61	10.45	8.09	-371.34		-371.34	-0.12	-0.12	8.09	4.63	
+9ee36418-ed86-45bf-ba00-67457101af89	Imane	Sarraj	460.61	453.67	1.94		-101.82		-101.82	-0.28	-0.28		5.00	
+e476a2ba-2a1b-43c9-bbc4-cf7e93c83986	Ali	Alouani	994.20	972.86	8.33		-107.83		-107.83	-0.16	-0.16		13.00	
+aaab1c40-042f-4a3c-916b-e6b59e4c0f44	Sofiane	Akli	1325.70	1238.63	56.63		-180.23		-180.23	-0.08	-0.08		30.44	
+8306d593-37dd-4c92-b152-ebf0ca5354b2	Brahim	Aloui	505.01	497.91	5.10		-42.44		-42.44	-0.28	-0.28		2.00	
+96060c6f-36f8-4ff9-a6c0-92bc45a19075	Ahmed	Kherfouche	536.50	527.24	3.26		-61.92		-61.92	-0.08	-0.08		6.00	
+66310da7-a454-4902-ba89-dc1ea3fa89af	Karim	Sidibe	730.77	706.97	23.80		-181.43		-181.43	-0.04	-0.04			
+d409253e-52f5-4816-9e78-6b890db203cb	Mourad	Bouakkaz	917.56	876.62	34.94		-142.41		-142.41	-0.24	-0.24		6.00	
+a53484f4-ce4a-4cbb-9b3a-8652f25c1afa	Abdelaziz	Guerfi	1061.47	1043.77	5.91		-99.77		-99.77	-0.04	-0.04		11.79	
+3adffadf-6d60-4a2f-a6e3-4ca3ffe3a72c	YOUNOUSSA	BAH	772.08	767.45		9.37	-128.21		-128.21			9.37	4.63	
+7e6b9ac8-24f0-4325-902e-2631b16f1f54	Ramzi	Khannoussi	438.78	425.99	11.79		-57.22		-57.22	-0.20	-0.20		1.00	
+eeffcd94-27a8-4b15-82e4-42996a50bc84	Rayen	Klai	66.15	66.06	0.09		-13.97		-13.97					
+3a100ded-7bc6-48d5-80d6-a84676c2ccd9	Bilel	Bouhali					-23503.15	-23503.15						
+fa89767a-12bb-4a95-b1db-5fb71719a940	FAICAL	JABRI	763.73	751.73	9.00		-135.15		-135.15	-0.20	-0.20		3.00	
+771ff113-4690-410d-bc41-5b5ca3bb2040	Ali	Kara	615.32	588.50	23.82					-0.32	-0.32		3.00	
+66cfb448-2a87-41ba-97f2-f0bb51b9b165	FATHIA	BOUFALGHA	1294.48	1270.05	5.43		-271.88		-271.88	-0.32	-0.32		19.00	
+c3bc3abe-643a-4431-ab51-8c06ede4b462	ABDOUL AZIZE	MOHAMED SAFIR	101.56	101.56			-103.24		-103.24	-0.04	-0.04			
+376a7dae-410e-4a9f-977a-b8d876cbb322	BRANDON JEAN-JIMMY	LOUISSAINT	252.52	248.40	2.12		-28.12		-28.12	-0.12	-0.12		2.00	
+4db066f5-f324-4ce7-bc35-6cdc02744ec9	Bryan Grégory	Michaud	100.45	100.21	0.24					-0.04	-0.04			
+bac2a019-9062-4116-9085-6da102d70c5d	OUSMANE	SYLLA	123.35	123.11	0.24		-31.89		-31.89	-0.04	-0.04			
+8f960007-a5d4-4ab4-b73e-224304f9861f	MEHDI	BOUCHNAG	684.26	666.80	3.58		-112.60		-112.60	-0.24	-0.24		13.88	
+c5fc6a45-db9e-4b52-a26f-407ad04c339e	Abdel Mouamane	Chelaif	1122.41	1070.22	30.66					-0.40	-0.40		21.53	
+ed046710-cb81-4e10-8981-2408f8f6d7a3	Samir	Laazibi	245.42	231.97	13.45		-60.64		-60.64					
+7ed4458a-eaaa-4e6d-98f6-24871c279a8a	MEHMET	ERGUN	230.10	229.52	0.58		-25.98		-25.98	-0.08	-0.08			
+01e09944-7e3c-456e-87ec-7c45c1b3cc26	Raoul Mansfeld	Bemma	433.87	419.26	1.61					-0.20	-0.20		13.00	
+544038a7-0fbf-48ae-b170-b087c5b50353	Khalid	Okeil	34.13	33.74	0.39					-0.08	-0.08			
+5fb339a5-f955-44c6-8a50-6970397bb753	ASMA	KISSI	80.12	79.75	0.37					-0.04	-0.04			
+61931f3a-cf60-42e3-9ef6-52108004b6d6	Ryan	Challab	853.61	488.56	322.42		-49.88		-49.88	-0.12	-0.12		2.63	40.00
+9501a412-f396-4d5e-80e6-05d9b3276311	Mohamed	El Khabazi	1344.86	1331.80	4.06		-140.02		-140.02	-0.44	-0.44		9.00	
+42bc51e5-9514-4e9d-81ce-e7db3c6a2682	Aymen	Ltifi	1029.63	1021.46	6.17	9.82	-186.96		-186.96	-0.20	-0.20	9.82	2.00	
+a60930ad-c1e7-4984-9893-e4bfe2db96b0	Zahia	Guesri	156.32	151.22	3.10		-28.67		-28.67	-0.03	-0.03		2.00	
+a0e498bc-3c9b-4c82-bc49-18718ccca9f0	Bechir	Ben Smida	562.18	557.73	4.45		-76.97		-76.97	-0.16	-0.16			
+c96fdca4-dd00-4532-bdd3-8cbce2d7edb5	Daba	Gandega	91.78	89.35	0.43		-32.69		-32.69				2.00	
+a2f299ae-f623-4841-935b-52caf47aef66	MOHAMED	ALOUi	551.80	534.47	16.46		-21.98		-21.98	-0.16	-0.16		0.87	
+e4157312-32c8-469d-b099-30f3b16cbe69	Ratiba	Beldjoudi	132.03	128.50	0.53		-25.94		-25.94				3.00	</textarea>
+    </div>
+  
+    <div id="tab-bolt" class="panel ">
+      
+
+      <div class="actions-bar">
+        <div>
+          <button class="btn-copy" onclick="copyTable('tab-bolt-tsv', 'alert-tab-bolt')">
+            📋 Copier cet onglet pour Google Sheets (Ctrl+C direct)
+          </button>
+          <span id="alert-tab-bolt" class="copy-alert">✓ Copié dans le presse-papier ! Faites Ctrl+V dans Google Sheets</span>
+        </div>
+        <div style="color: var(--text-muted); font-size: 13px;">
+          Fichier généré : <code>GoogleSheets_Bolt_Semaine.csv</code> (34 lignes)
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Chauffeur</th><th>Adresse e-mail</th><th>Téléphone</th><th>Revenus bruts (total)|€</th><th>Revenus bruts (paiement dans l'application)|€</th><th>Revenus bruts (paiement par espèces)|€</th><th>Montant des espèces perçu|€</th><th>Pourboires des clients|€</th><th>Revenus des campagnes|€</th><th>Remboursements de frais|€</th><th>Frais d'annulation|€</th><th>Frais de péage|€</th><th>Frais de réservation|€</th><th>Total des frais|€</th><th>Frais de service|€</th><th>Remboursements aux clients|€</th><th>Autres frais|€</th><th>Revenus nets|€</th><th>Paiement prévu|€</th><th>Revenus bruts par heure|€/h</th><th>Revenus nets par heure|€/h</th><th>Réduction sur commission (dans l'application)|€</th><th>Réduction sur commission (en espèces)|€</th><th>Identifiant chauffeur</th><th>Identifiant individuel</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>Abdel Mouamane CHELAIF</td><td>chelaifmoumen@gmail.com</td><td>+33753606026</td><td>84.30</td><td>84.30</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>20.63</td><td>20.63</td><td>0.00</td><td>0.00</td><td>63.67</td><td>63.67</td><td>5.96</td><td>4.50</td><td>0.00</td><td>0.00</td><td>d46ad08d-1dec-4930-81dd-3372e58f027f</td><td>3190a745-8251-4ed1-85fc-3e73b7406e6d</td>
+              </tr>
+            
+              <tr>
+                <td>Abdoul Azize MOHAMED SAFIR</td><td>abazizsafir.pro@gmail.com</td><td>+33761529386</td><td>224.70</td><td>0.00</td><td>224.70</td><td>182.30</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>54.86</td><td>54.86</td><td>0.00</td><td>0.00</td><td>169.84</td><td>-12.46</td><td>19.05</td><td>14.40</td><td>0.00</td><td>0.00</td><td>69ca2620-9994-4a35-ae6d-8b03212f66a2</td><td>1612557c-5d49-40d4-af57-b5dc91a98012</td>
+              </tr>
+            
+              <tr>
+                <td>Adam Machtou</td><td>machtou.adam@gmail.com</td><td>+33618757203</td><td>306.20</td><td>258.30</td><td>24.60</td><td>23.40</td><td>0.00</td><td>23.30</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>69.02</td><td>69.02</td><td>0.00</td><td>0.00</td><td>237.18</td><td>213.78</td><td>17.65</td><td>13.67</td><td>0.00</td><td>0.00</td><td>497378a6-59fb-4727-b3ab-22a1046a8e4b</td><td>e89d1eb3-5855-4197-bfff-1129bc35f787</td>
+              </tr>
+            
+              <tr>
+                <td>Ali Alouani</td><td>ali.alouani.95@gmail.com</td><td>+33618122054</td><td>1298.30</td><td>673.00</td><td>612.30</td><td>492.40</td><td>6.00</td><td>0.00</td><td>0.00</td><td>7.00</td><td>1.70</td><td>0.75</td><td>352.06</td><td>352.06</td><td>0.00</td><td>0.00</td><td>946.24</td><td>453.84</td><td>22.60</td><td>16.47</td><td>0.00</td><td>0.00</td><td>bcf5d87f-9b4c-46a1-95be-66a591f97483</td><td>2d0d604e-df4f-47df-97e1-bbf4a7fc26fd</td>
+              </tr>
+            
+              <tr>
+                <td>Ali Kara</td><td>ali1978kara@hotmail.fr</td><td>+33695644791</td><td>760.50</td><td>742.50</td><td>0.00</td><td>0.00</td><td>9.00</td><td>0.00</td><td>0.00</td><td>9.00</td><td>0.00</td><td>16.14</td><td>187.49</td><td>187.49</td><td>0.00</td><td>0.00</td><td>573.01</td><td>573.01</td><td>15.41</td><td>11.61</td><td>0.00</td><td>0.00</td><td>307fd49a-f4c7-48c8-af8e-2b3005f3adc4</td><td>a459d926-d28a-4762-bf99-eac1118755c3</td>
+              </tr>
+            
+              <tr>
+                <td>Aymen Ltifi</td><td>ltifiservices@outlook.com</td><td>+33760731822</td><td>119.20</td><td>114.80</td><td>0.00</td><td>0.00</td><td>0.00</td><td>4.40</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>32.64</td><td>32.64</td><td>0.00</td><td>0.00</td><td>86.56</td><td>86.56</td><td>7.52</td><td>5.46</td><td>0.00</td><td>0.00</td><td>b19b658d-d123-458b-8254-f36d57c2409d</td><td>57b89725-d9e8-4c2d-b00f-c603f0cb565e</td>
+              </tr>
+            
+              <tr>
+                <td>Bouchaïb Belkharras</td><td>bouch.bb@hotmail.com</td><td>+33658123002</td><td>744.60</td><td>500.50</td><td>208.10</td><td>178.00</td><td>7.00</td><td>29.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>175.68</td><td>175.68</td><td>0.00</td><td>0.00</td><td>568.92</td><td>390.92</td><td>28.91</td><td>22.09</td><td>0.00</td><td>0.00</td><td>5c67fc93-d40b-4960-be79-cc7963c0937b</td><td>a0f3b2ae-0116-4adb-bdfd-0071d6d5f8c9</td>
+              </tr>
+            
+              <tr>
+                <td>Brandon Jean Jimmy Louissaint</td><td>louissaintbrandon@hotmail.com</td><td>+33635481157</td><td>1081.20</td><td>761.40</td><td>308.80</td><td>289.10</td><td>11.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>9.00</td><td>264.76</td><td>264.76</td><td>0.00</td><td>0.00</td><td>816.44</td><td>527.34</td><td>14.81</td><td>11.18</td><td>0.00</td><td>0.00</td><td>b60e6602-1052-41a1-9fc2-1affbf421ad9</td><td>2382b4ae-6e69-4e04-9886-656f9f15eafa</td>
+              </tr>
+            
+              <tr>
+                <td>Bryan Gregory Michaud</td><td>bryan.michaud11@gmail.com</td><td>+33783633084</td><td>242.50</td><td>173.10</td><td>69.40</td><td>62.50</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>62.85</td><td>62.85</td><td>0.00</td><td>0.00</td><td>179.65</td><td>117.15</td><td>19.55</td><td>14.48</td><td>0.00</td><td>0.00</td><td>162246e6-a7c5-43bd-b511-7536fcfd4ea7</td><td>925e94a3-c2dd-4021-91b8-2a5e0f9ad4e3</td>
+              </tr>
+            
+              <tr>
+                <td>Foued Karoui</td><td>karfoued@gmail.com</td><td>+33625815497</td><td>338.40</td><td>338.40</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>100.07</td><td>100.07</td><td>0.00</td><td>0.00</td><td>238.33</td><td>238.33</td><td>11.00</td><td>7.75</td><td>0.00</td><td>0.00</td><td>9a7fcf32-1038-4149-84ff-8d5b434d9b6a</td><td>56c1b0d3-5bd8-4c4a-9f5c-54b6303eb08b</td>
+              </tr>
+            
+              <tr>
+                <td>Haythem Dhifi</td><td>dhifi.haythem.hd@gmail.com</td><td>+33612674248</td><td>343.92</td><td>158.70</td><td>145.90</td><td>123.10</td><td>5.00</td><td>34.32</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>76.67</td><td>76.67</td><td>0.00</td><td>0.00</td><td>267.25</td><td>144.15</td><td>18.20</td><td>14.15</td><td>0.00</td><td>0.00</td><td>4def7bfb-ffe0-4813-9f77-15f89b216145</td><td>29f03965-977b-498c-8ffe-6681ffb1842e</td>
+              </tr>
+            
+              <tr>
+                <td>Imane Sarraj</td><td>imane.sar2009@gmail.com</td><td>+33658430022</td><td>197.20</td><td>131.10</td><td>61.20</td><td>60.50</td><td>0.00</td><td>4.90</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>46.84</td><td>46.84</td><td>0.00</td><td>0.00</td><td>150.36</td><td>89.86</td><td>8.06</td><td>6.14</td><td>0.00</td><td>0.00</td><td>49d9129b-dd2d-4b0f-971b-39490f7c0451</td><td>0ce54590-27eb-4160-9229-46b63398e31b</td>
+              </tr>
+            
+              <tr>
+                <td>Khalid OKEIL</td><td>khalidokeil@outlook.fr</td><td>+33685369354</td><td>78.60</td><td>78.60</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>21.59</td><td>21.59</td><td>0.00</td><td>0.00</td><td>57.01</td><td>57.01</td><td>15.47</td><td>11.22</td><td>0.00</td><td>0.00</td><td>23bd1cfa-7e1f-49a5-a59d-11bda6a265d8</td><td>c667f6b4-93da-4767-ba91-8cd026cc9751</td>
+              </tr>
+            
+              <tr>
+                <td>Mehdi Bouchnag</td><td>Bouchnagmehdi@yahoo.fr</td><td>+33623577818</td><td>130.30</td><td>128.30</td><td>0.00</td><td>0.00</td><td>2.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>5.00</td><td>29.66</td><td>29.66</td><td>0.00</td><td>0.00</td><td>100.64</td><td>100.64</td><td>5.97</td><td>4.61</td><td>0.00</td><td>0.00</td><td>ece9069e-7c9b-423e-a22a-b7dd820e89e5</td><td>306917a8-a5ba-4cc9-9f3e-c7d10281502f</td>
+              </tr>
+            
+              <tr>
+                <td>Mehmet Ergun</td><td>Mht.Egn1@icloud.com</td><td>+33782313002</td><td>502.30</td><td>305.60</td><td>182.70</td><td>165.40</td><td>5.00</td><td>0.00</td><td>0.00</td><td>9.00</td><td>0.00</td><td>0.00</td><td>148.97</td><td>148.97</td><td>0.00</td><td>0.00</td><td>353.33</td><td>187.93</td><td>17.84</td><td>12.55</td><td>0.00</td><td>0.00</td><td>6b7b564c-1974-400f-96e0-3085c947db1d</td><td>6be3efe2-6a0d-4d08-b562-6e90f1570d69</td>
+              </tr>
+            
+              <tr>
+                <td>Mohamed Aloui</td><td>Fainflash@hotmail.com</td><td>+33762769951</td><td>662.04</td><td>539.70</td><td>100.50</td><td>94.00</td><td>6.00</td><td>6.84</td><td>0.00</td><td>9.00</td><td>0.00</td><td>0.00</td><td>157.92</td><td>157.92</td><td>0.00</td><td>0.00</td><td>504.12</td><td>410.12</td><td>20.05</td><td>15.27</td><td>0.00</td><td>0.00</td><td>8eae2da4-4c91-4c9a-9206-f562e658950e</td><td>921a0546-c1eb-4def-8e1c-8e35a1cd4c61</td>
+              </tr>
+            
+              <tr>
+                <td>Mohamed Bayrem Allagui</td><td>bayrouma18@gmail.com</td><td>+33621478333</td><td>717.92</td><td>322.20</td><td>390.40</td><td>328.30</td><td>0.00</td><td>5.32</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>208.36</td><td>208.36</td><td>0.00</td><td>0.00</td><td>509.56</td><td>181.26</td><td>22.81</td><td>16.19</td><td>0.00</td><td>0.00</td><td>00668859-ccfc-4665-b151-e6fc4ed1979d</td><td>d2f45c52-1038-4c97-972e-84d098a101a8</td>
+              </tr>
+            
+              <tr>
+                <td>Mohamed El Khabazi</td><td>elkhabazimohamed1@gmail.com</td><td>+33784678499</td><td>342.40</td><td>246.70</td><td>95.70</td><td>84.80</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>83.24</td><td>83.24</td><td>0.00</td><td>0.00</td><td>259.16</td><td>174.36</td><td>8.15</td><td>6.17</td><td>0.00</td><td>0.00</td><td>9fe98d61-0076-4f65-ad5f-f056f0dd1f29</td><td>53a54294-3c06-40bc-913e-1b304db7a292</td>
+              </tr>
+            
+              <tr>
+                <td>Mohamed Fehdi Ben-Fekih</td><td>mfbf@hotmail.fr</td><td>+33662727924</td><td>191.10</td><td>81.30</td><td>109.80</td><td>90.90</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>45.94</td><td>45.94</td><td>0.00</td><td>0.00</td><td>145.16</td><td>54.26</td><td>7.42</td><td>5.64</td><td>0.00</td><td>0.00</td><td>fca5781f-c0b3-482a-bf58-02be73f6017a</td><td>c359bafe-0a41-4772-916a-5f05c3360748</td>
+              </tr>
+            
+              <tr>
+                <td>Mohammed Adel benabdelouahed</td><td>adelbenan@gmail.com</td><td>+33782790937</td><td>263.60</td><td>166.70</td><td>90.90</td><td>78.20</td><td>6.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>2.25</td><td>62.12</td><td>62.12</td><td>0.00</td><td>0.00</td><td>201.48</td><td>123.28</td><td>9.57</td><td>7.31</td><td>0.00</td><td>0.00</td><td>5ace70b0-cac9-41e8-97b3-c4011201eb1f</td><td>71f63978-908c-414c-9635-75dbda7be6fa</td>
+              </tr>
+            
+              <tr>
+                <td>Noureddine Tattouche</td><td>tattouche.noureddine@yahoo.com</td><td>+33675941291</td><td>373.90</td><td>261.30</td><td>99.60</td><td>86.50</td><td>1.00</td><td>12.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>93.86</td><td>93.86</td><td>0.00</td><td>0.00</td><td>280.04</td><td>193.54</td><td>11.83</td><td>8.86</td><td>0.00</td><td>0.00</td><td>aa114c68-4b58-427c-933d-8b7045df2775</td><td>84fa77a2-093e-4c60-ae73-24f83d2253cf</td>
+              </tr>
+            
+              <tr>
+                <td>Rachid Chinoune</td><td>crtp2023@gmail.com</td><td>+33619305126</td><td>198.90</td><td>146.90</td><td>0.00</td><td>0.00</td><td>2.00</td><td>50.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>35.48</td><td>35.48</td><td>0.00</td><td>0.00</td><td>163.42</td><td>163.42</td><td>34.48</td><td>28.33</td><td>0.00</td><td>0.00</td><td>323c85eb-b81a-47d3-9685-8be693e6659a</td><td>ec1014e5-5d3c-4e2c-9a12-b0d90114b14b</td>
+              </tr>
+            
+              <tr>
+                <td>Raed Loghmari</td><td>raed85@hotmail.fr</td><td>+33652147683</td><td>606.50</td><td>115.80</td><td>488.70</td><td>410.60</td><td>2.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.58</td><td>166.19</td><td>166.19</td><td>0.00</td><td>0.00</td><td>440.31</td><td>29.71</td><td>17.35</td><td>12.59</td><td>0.00</td><td>0.00</td><td>0a9213cd-a04f-46e4-b913-84d4ff071434</td><td>3cdb51cc-d953-40d7-b72e-00a108c27d54</td>
+              </tr>
+            
+              <tr>
+                <td>Ramzi Khannoussi</td><td>ziram_k@yahoo.fr</td><td>+33682163015</td><td>497.80</td><td>295.70</td><td>202.10</td><td>183.40</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>2.87</td><td>124.97</td><td>124.97</td><td>0.00</td><td>0.00</td><td>372.83</td><td>189.43</td><td>13.96</td><td>10.45</td><td>0.00</td><td>0.00</td><td>5625333c-132d-4478-b114-a7f56933870f</td><td>ffc2e3f4-558b-4f49-bd13-7c0797e69896</td>
+              </tr>
+            
+              <tr>
+                <td>Ratiba GUESRI</td><td>beldjoudilina@hotmail.fr</td><td>+33695084256</td><td>411.10</td><td>65.70</td><td>337.40</td><td>292.90</td><td>0.00</td><td>0.00</td><td>8.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>109.65</td><td>109.65</td><td>0.00</td><td>0.00</td><td>301.45</td><td>8.55</td><td>25.66</td><td>18.82</td><td>0.00</td><td>0.00</td><td>3bf88caf-533b-447b-9333-e2b50f31e0ec</td><td>7b069d23-3a6c-4b74-960c-4e837535c946</td>
+              </tr>
+            
+              <tr>
+                <td>Rayen Klai</td><td>rayenvtc@outlook.fr</td><td>+33766833146</td><td>195.40</td><td>141.10</td><td>46.50</td><td>38.20</td><td>5.00</td><td>0.00</td><td>2.80</td><td>0.00</td><td>0.00</td><td>0.00</td><td>45.83</td><td>45.83</td><td>0.00</td><td>0.00</td><td>149.57</td><td>111.37</td><td>6.57</td><td>5.03</td><td>0.00</td><td>0.00</td><td>a460a9ba-d2c9-48f7-884e-c340e92842e7</td><td>caed6bc7-0063-4d1c-90bc-2e058d8485d9</td>
+              </tr>
+            
+              <tr>
+                <td>Robert-Ionut Neagu</td><td>robertneagu44@gmail.com</td><td>+33656859258</td><td>240.80</td><td>179.50</td><td>59.30</td><td>51.60</td><td>2.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>58.23</td><td>58.23</td><td>0.00</td><td>0.00</td><td>182.57</td><td>130.97</td><td>18.77</td><td>14.23</td><td>0.00</td><td>0.00</td><td>9ea5bf84-292f-469c-af11-61c0ad7259ae</td><td>ccd5500a-d135-47b4-86c1-dc195665c673</td>
+              </tr>
+            
+              <tr>
+                <td>Ryan Ouali Challab</td><td>ryanchallab93600@gmail.com</td><td>+33768419070</td><td>173.50</td><td>172.50</td><td>0.00</td><td>0.00</td><td>1.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>41.84</td><td>41.84</td><td>0.00</td><td>0.00</td><td>131.66</td><td>131.66</td><td>11.55</td><td>8.77</td><td>0.00</td><td>0.00</td><td>9d93d037-2d49-4b6e-a6c1-9b091a67e36d</td><td>f01f49ac-cda9-4666-85a9-113bf090daf4</td>
+              </tr>
+            
+              <tr>
+                <td>SAMIR LAAZIBI</td><td>laazibisamir@gmail.com</td><td>+33661926124</td><td>12.80</td><td>12.80</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>3.07</td><td>3.07</td><td>0.00</td><td>0.00</td><td>9.73</td><td>9.73</td><td>2.15</td><td>1.63</td><td>0.00</td><td>0.00</td><td>9f80841a-5b59-452d-9415-7c1fcb4165cb</td><td>a996f1dd-37a6-4966-87ba-3f57f0878f6d</td>
+              </tr>
+            
+              <tr>
+                <td>Siré Niakaté</td><td>sireniakate71@gmail.com</td><td>+33764005951</td><td>423.10</td><td>223.90</td><td>189.70</td><td>154.80</td><td>0.00</td><td>9.50</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>108.05</td><td>108.05</td><td>0.00</td><td>0.00</td><td>315.05</td><td>160.25</td><td>17.35</td><td>12.92</td><td>0.00</td><td>0.00</td><td>8aafe327-651c-477c-8ffa-a41963c4abd9</td><td>b0d933e3-105b-4956-a1ba-0c1d94a4c2e2</td>
+              </tr>
+            
+              <tr>
+                <td>Youcef Kherfouche</td><td>kherfoucheyoucef@gmail.com</td><td>+33624707164</td><td>399.30</td><td>180.70</td><td>213.60</td><td>182.20</td><td>5.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>101.14</td><td>101.14</td><td>0.00</td><td>0.00</td><td>298.16</td><td>115.96</td><td>24.64</td><td>18.40</td><td>0.00</td><td>0.00</td><td>2c5440f8-160f-4521-93d2-e267b5882641</td><td>1f94f760-3a12-4bf1-b249-c2c9bb096890</td>
+              </tr>
+            
+              <tr>
+                <td>Zahia Guesri</td><td>zaza.guess@hotmail.fr</td><td>+33669354856</td><td>455.92</td><td>304.30</td><td>146.30</td><td>117.70</td><td>0.00</td><td>5.32</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>108.14</td><td>108.14</td><td>0.00</td><td>0.00</td><td>347.78</td><td>230.08</td><td>9.40</td><td>7.17</td><td>0.00</td><td>0.00</td><td>1bc6be45-b3b0-4540-8823-d0ee2f286ebd</td><td>1b948bd7-4fa4-4923-8bf4-f4f963c9af16</td>
+              </tr>
+            
+              <tr>
+                <td>Ziaed Hamila</td><td>Teezere@outlook.fr</td><td>+33650235792</td><td>835.40</td><td>810.40</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>25.00</td><td>0.00</td><td>0.00</td><td>207.40</td><td>207.40</td><td>0.00</td><td>0.00</td><td>628.00</td><td>628.00</td><td>16.41</td><td>12.33</td><td>0.00</td><td>0.00</td><td>8831f293-8237-4e7e-9123-54811b9034bf</td><td>3ad1c544-6cae-453a-b2f6-c715ac6688f7</td>
+              </tr>
+            
+              <tr>
+                <td>brahim aloui</td><td>alouibrahim@ymail.com</td><td>+33624959758</td><td>293.92</td><td>249.50</td><td>39.10</td><td>34.90</td><td>0.00</td><td>5.32</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>70.08</td><td>70.08</td><td>0.00</td><td>0.00</td><td>223.84</td><td>188.94</td><td>9.38</td><td>7.14</td><td>0.00</td><td>0.00</td><td>060bc180-8342-4e82-b5a8-8c52ac504791</td><td>e68edc93-7e42-4b0f-add5-cdf0a1b0f1ab</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      </div>
+      <textarea id="tab-bolt-tsv" style="display:none;">﻿Chauffeur	Adresse e-mail	Téléphone	Revenus bruts (total)|€	Revenus bruts (paiement dans l'application)|€	Revenus bruts (paiement par espèces)|€	Montant des espèces perçu|€	Pourboires des clients|€	Revenus des campagnes|€	Remboursements de frais|€	Frais d'annulation|€	Frais de péage|€	Frais de réservation|€	Total des frais|€	Frais de service|€	Remboursements aux clients|€	Autres frais|€	Revenus nets|€	Paiement prévu|€	Revenus bruts par heure|€/h	Revenus nets par heure|€/h	Réduction sur commission (dans l'application)|€	Réduction sur commission (en espèces)|€	Identifiant chauffeur	Identifiant individuel
+Abdel Mouamane CHELAIF	chelaifmoumen@gmail.com	+33753606026	84.30	84.30	0.00	0.00	0.00	0.00	0.00	0.00	0.00	0.00	20.63	20.63	0.00	0.00	63.67	63.67	5.96	4.50	0.00	0.00	d46ad08d-1dec-4930-81dd-3372e58f027f	3190a745-8251-4ed1-85fc-3e73b7406e6d
+Abdoul Azize MOHAMED SAFIR	abazizsafir.pro@gmail.com	+33761529386	224.70	0.00	224.70	182.30	0.00	0.00	0.00	0.00	0.00	0.00	54.86	54.86	0.00	0.00	169.84	-12.46	19.05	14.40	0.00	0.00	69ca2620-9994-4a35-ae6d-8b03212f66a2	1612557c-5d49-40d4-af57-b5dc91a98012
+Adam Machtou	machtou.adam@gmail.com	+33618757203	306.20	258.30	24.60	23.40	0.00	23.30	0.00	0.00	0.00	0.00	69.02	69.02	0.00	0.00	237.18	213.78	17.65	13.67	0.00	0.00	497378a6-59fb-4727-b3ab-22a1046a8e4b	e89d1eb3-5855-4197-bfff-1129bc35f787
+Ali Alouani	ali.alouani.95@gmail.com	+33618122054	1298.30	673.00	612.30	492.40	6.00	0.00	0.00	7.00	1.70	0.75	352.06	352.06	0.00	0.00	946.24	453.84	22.60	16.47	0.00	0.00	bcf5d87f-9b4c-46a1-95be-66a591f97483	2d0d604e-df4f-47df-97e1-bbf4a7fc26fd
+Ali Kara	ali1978kara@hotmail.fr	+33695644791	760.50	742.50	0.00	0.00	9.00	0.00	0.00	9.00	0.00	16.14	187.49	187.49	0.00	0.00	573.01	573.01	15.41	11.61	0.00	0.00	307fd49a-f4c7-48c8-af8e-2b3005f3adc4	a459d926-d28a-4762-bf99-eac1118755c3
+Aymen Ltifi	ltifiservices@outlook.com	+33760731822	119.20	114.80	0.00	0.00	0.00	4.40	0.00	0.00	0.00	0.00	32.64	32.64	0.00	0.00	86.56	86.56	7.52	5.46	0.00	0.00	b19b658d-d123-458b-8254-f36d57c2409d	57b89725-d9e8-4c2d-b00f-c603f0cb565e
+Bouchaïb Belkharras	bouch.bb@hotmail.com	+33658123002	744.60	500.50	208.10	178.00	7.00	29.00	0.00	0.00	0.00	0.00	175.68	175.68	0.00	0.00	568.92	390.92	28.91	22.09	0.00	0.00	5c67fc93-d40b-4960-be79-cc7963c0937b	a0f3b2ae-0116-4adb-bdfd-0071d6d5f8c9
+Brandon Jean Jimmy Louissaint	louissaintbrandon@hotmail.com	+33635481157	1081.20	761.40	308.80	289.10	11.00	0.00	0.00	0.00	0.00	9.00	264.76	264.76	0.00	0.00	816.44	527.34	14.81	11.18	0.00	0.00	b60e6602-1052-41a1-9fc2-1affbf421ad9	2382b4ae-6e69-4e04-9886-656f9f15eafa
+Bryan Gregory Michaud	bryan.michaud11@gmail.com	+33783633084	242.50	173.10	69.40	62.50	0.00	0.00	0.00	0.00	0.00	0.00	62.85	62.85	0.00	0.00	179.65	117.15	19.55	14.48	0.00	0.00	162246e6-a7c5-43bd-b511-7536fcfd4ea7	925e94a3-c2dd-4021-91b8-2a5e0f9ad4e3
+Foued Karoui	karfoued@gmail.com	+33625815497	338.40	338.40	0.00	0.00	0.00	0.00	0.00	0.00	0.00	0.00	100.07	100.07	0.00	0.00	238.33	238.33	11.00	7.75	0.00	0.00	9a7fcf32-1038-4149-84ff-8d5b434d9b6a	56c1b0d3-5bd8-4c4a-9f5c-54b6303eb08b
+Haythem Dhifi	dhifi.haythem.hd@gmail.com	+33612674248	343.92	158.70	145.90	123.10	5.00	34.32	0.00	0.00	0.00	0.00	76.67	76.67	0.00	0.00	267.25	144.15	18.20	14.15	0.00	0.00	4def7bfb-ffe0-4813-9f77-15f89b216145	29f03965-977b-498c-8ffe-6681ffb1842e
+Imane Sarraj	imane.sar2009@gmail.com	+33658430022	197.20	131.10	61.20	60.50	0.00	4.90	0.00	0.00	0.00	0.00	46.84	46.84	0.00	0.00	150.36	89.86	8.06	6.14	0.00	0.00	49d9129b-dd2d-4b0f-971b-39490f7c0451	0ce54590-27eb-4160-9229-46b63398e31b
+Khalid OKEIL	khalidokeil@outlook.fr	+33685369354	78.60	78.60	0.00	0.00	0.00	0.00	0.00	0.00	0.00	0.00	21.59	21.59	0.00	0.00	57.01	57.01	15.47	11.22	0.00	0.00	23bd1cfa-7e1f-49a5-a59d-11bda6a265d8	c667f6b4-93da-4767-ba91-8cd026cc9751
+Mehdi Bouchnag	Bouchnagmehdi@yahoo.fr	+33623577818	130.30	128.30	0.00	0.00	2.00	0.00	0.00	0.00	0.00	5.00	29.66	29.66	0.00	0.00	100.64	100.64	5.97	4.61	0.00	0.00	ece9069e-7c9b-423e-a22a-b7dd820e89e5	306917a8-a5ba-4cc9-9f3e-c7d10281502f
+Mehmet Ergun	Mht.Egn1@icloud.com	+33782313002	502.30	305.60	182.70	165.40	5.00	0.00	0.00	9.00	0.00	0.00	148.97	148.97	0.00	0.00	353.33	187.93	17.84	12.55	0.00	0.00	6b7b564c-1974-400f-96e0-3085c947db1d	6be3efe2-6a0d-4d08-b562-6e90f1570d69
+Mohamed Aloui	Fainflash@hotmail.com	+33762769951	662.04	539.70	100.50	94.00	6.00	6.84	0.00	9.00	0.00	0.00	157.92	157.92	0.00	0.00	504.12	410.12	20.05	15.27	0.00	0.00	8eae2da4-4c91-4c9a-9206-f562e658950e	921a0546-c1eb-4def-8e1c-8e35a1cd4c61
+Mohamed Bayrem Allagui	bayrouma18@gmail.com	+33621478333	717.92	322.20	390.40	328.30	0.00	5.32	0.00	0.00	0.00	0.00	208.36	208.36	0.00	0.00	509.56	181.26	22.81	16.19	0.00	0.00	00668859-ccfc-4665-b151-e6fc4ed1979d	d2f45c52-1038-4c97-972e-84d098a101a8
+Mohamed El Khabazi	elkhabazimohamed1@gmail.com	+33784678499	342.40	246.70	95.70	84.80	0.00	0.00	0.00	0.00	0.00	0.00	83.24	83.24	0.00	0.00	259.16	174.36	8.15	6.17	0.00	0.00	9fe98d61-0076-4f65-ad5f-f056f0dd1f29	53a54294-3c06-40bc-913e-1b304db7a292
+Mohamed Fehdi Ben-Fekih	mfbf@hotmail.fr	+33662727924	191.10	81.30	109.80	90.90	0.00	0.00	0.00	0.00	0.00	0.00	45.94	45.94	0.00	0.00	145.16	54.26	7.42	5.64	0.00	0.00	fca5781f-c0b3-482a-bf58-02be73f6017a	c359bafe-0a41-4772-916a-5f05c3360748
+Mohammed Adel benabdelouahed	adelbenan@gmail.com	+33782790937	263.60	166.70	90.90	78.20	6.00	0.00	0.00	0.00	0.00	2.25	62.12	62.12	0.00	0.00	201.48	123.28	9.57	7.31	0.00	0.00	5ace70b0-cac9-41e8-97b3-c4011201eb1f	71f63978-908c-414c-9635-75dbda7be6fa
+Noureddine Tattouche	tattouche.noureddine@yahoo.com	+33675941291	373.90	261.30	99.60	86.50	1.00	12.00	0.00	0.00	0.00	0.00	93.86	93.86	0.00	0.00	280.04	193.54	11.83	8.86	0.00	0.00	aa114c68-4b58-427c-933d-8b7045df2775	84fa77a2-093e-4c60-ae73-24f83d2253cf
+Rachid Chinoune	crtp2023@gmail.com	+33619305126	198.90	146.90	0.00	0.00	2.00	50.00	0.00	0.00	0.00	0.00	35.48	35.48	0.00	0.00	163.42	163.42	34.48	28.33	0.00	0.00	323c85eb-b81a-47d3-9685-8be693e6659a	ec1014e5-5d3c-4e2c-9a12-b0d90114b14b
+Raed Loghmari	raed85@hotmail.fr	+33652147683	606.50	115.80	488.70	410.60	2.00	0.00	0.00	0.00	0.00	0.58	166.19	166.19	0.00	0.00	440.31	29.71	17.35	12.59	0.00	0.00	0a9213cd-a04f-46e4-b913-84d4ff071434	3cdb51cc-d953-40d7-b72e-00a108c27d54
+Ramzi Khannoussi	ziram_k@yahoo.fr	+33682163015	497.80	295.70	202.10	183.40	0.00	0.00	0.00	0.00	0.00	2.87	124.97	124.97	0.00	0.00	372.83	189.43	13.96	10.45	0.00	0.00	5625333c-132d-4478-b114-a7f56933870f	ffc2e3f4-558b-4f49-bd13-7c0797e69896
+Ratiba GUESRI	beldjoudilina@hotmail.fr	+33695084256	411.10	65.70	337.40	292.90	0.00	0.00	8.00	0.00	0.00	0.00	109.65	109.65	0.00	0.00	301.45	8.55	25.66	18.82	0.00	0.00	3bf88caf-533b-447b-9333-e2b50f31e0ec	7b069d23-3a6c-4b74-960c-4e837535c946
+Rayen Klai	rayenvtc@outlook.fr	+33766833146	195.40	141.10	46.50	38.20	5.00	0.00	2.80	0.00	0.00	0.00	45.83	45.83	0.00	0.00	149.57	111.37	6.57	5.03	0.00	0.00	a460a9ba-d2c9-48f7-884e-c340e92842e7	caed6bc7-0063-4d1c-90bc-2e058d8485d9
+Robert-Ionut Neagu	robertneagu44@gmail.com	+33656859258	240.80	179.50	59.30	51.60	2.00	0.00	0.00	0.00	0.00	0.00	58.23	58.23	0.00	0.00	182.57	130.97	18.77	14.23	0.00	0.00	9ea5bf84-292f-469c-af11-61c0ad7259ae	ccd5500a-d135-47b4-86c1-dc195665c673
+Ryan Ouali Challab	ryanchallab93600@gmail.com	+33768419070	173.50	172.50	0.00	0.00	1.00	0.00	0.00	0.00	0.00	0.00	41.84	41.84	0.00	0.00	131.66	131.66	11.55	8.77	0.00	0.00	9d93d037-2d49-4b6e-a6c1-9b091a67e36d	f01f49ac-cda9-4666-85a9-113bf090daf4
+SAMIR LAAZIBI	laazibisamir@gmail.com	+33661926124	12.80	12.80	0.00	0.00	0.00	0.00	0.00	0.00	0.00	0.00	3.07	3.07	0.00	0.00	9.73	9.73	2.15	1.63	0.00	0.00	9f80841a-5b59-452d-9415-7c1fcb4165cb	a996f1dd-37a6-4966-87ba-3f57f0878f6d
+Siré Niakaté	sireniakate71@gmail.com	+33764005951	423.10	223.90	189.70	154.80	0.00	9.50	0.00	0.00	0.00	0.00	108.05	108.05	0.00	0.00	315.05	160.25	17.35	12.92	0.00	0.00	8aafe327-651c-477c-8ffa-a41963c4abd9	b0d933e3-105b-4956-a1ba-0c1d94a4c2e2
+Youcef Kherfouche	kherfoucheyoucef@gmail.com	+33624707164	399.30	180.70	213.60	182.20	5.00	0.00	0.00	0.00	0.00	0.00	101.14	101.14	0.00	0.00	298.16	115.96	24.64	18.40	0.00	0.00	2c5440f8-160f-4521-93d2-e267b5882641	1f94f760-3a12-4bf1-b249-c2c9bb096890
+Zahia Guesri	zaza.guess@hotmail.fr	+33669354856	455.92	304.30	146.30	117.70	0.00	5.32	0.00	0.00	0.00	0.00	108.14	108.14	0.00	0.00	347.78	230.08	9.40	7.17	0.00	0.00	1bc6be45-b3b0-4540-8823-d0ee2f286ebd	1b948bd7-4fa4-4923-8bf4-f4f963c9af16
+Ziaed Hamila	Teezere@outlook.fr	+33650235792	835.40	810.40	0.00	0.00	0.00	0.00	0.00	25.00	0.00	0.00	207.40	207.40	0.00	0.00	628.00	628.00	16.41	12.33	0.00	0.00	8831f293-8237-4e7e-9123-54811b9034bf	3ad1c544-6cae-453a-b2f6-c715ac6688f7
+brahim aloui	alouibrahim@ymail.com	+33624959758	293.92	249.50	39.10	34.90	0.00	5.32	0.00	0.00	0.00	0.00	70.08	70.08	0.00	0.00	223.84	188.94	9.38	7.14	0.00	0.00	060bc180-8342-4e82-b5a8-8c52ac504791	e68edc93-7e42-4b0f-add5-cdf0a1b0f1ab</textarea>
+    </div>
+  
+    <div id="tab-heetch" class="panel ">
+      
+
+      <div class="actions-bar">
+        <div>
+          <button class="btn-copy" onclick="copyTable('tab-heetch-tsv', 'alert-tab-heetch')">
+            📋 Copier cet onglet pour Google Sheets (Ctrl+C direct)
+          </button>
+          <span id="alert-tab-heetch" class="copy-alert">✓ Copié dans le presse-papier ! Faites Ctrl+V dans Google Sheets</span>
+        </div>
+        <div style="color: var(--text-muted); font-size: 13px;">
+          Fichier généré : <code>GoogleSheets_Heetch_Semaine.csv</code> (5 lignes)
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Chauffeur</th><th>ID chauffeur</th><th>Solde initial</th><th>Revenus net</th><th>Ajustements</th><th>Espèces collectées</th><th>Paiement dette</th><th>Versement flotte</th><th>Solde final à verser</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>Robert-Ionut Neagu</td><td>412e4c99-81a8-4cca-a01c-a7136e4965e9</td><td>-8,84</td><td>51,13</td><td>0,00</td><td>-70,50</td><td>0,00</td><td>0,00</td><td>-28,21</td>
+              </tr>
+            
+              <tr>
+                <td>Brandon Louissaint</td><td>8726321e-1a99-45b6-b394-ed1bae3c314d</td><td>0,00</td><td>25,20</td><td>0,00</td><td>-36,00</td><td>0,00</td><td>0,00</td><td>-10,80</td>
+              </tr>
+            
+              <tr>
+                <td>Mohamed Aloui</td><td>17718ea5-13f3-4b88-8d54-c8c53a4f92b0</td><td>0,00</td><td>8,20</td><td>0,00</td><td>-10,00</td><td>0,00</td><td>0,00</td><td>-1,80</td>
+              </tr>
+            
+              <tr>
+                <td>Mohamed Fehdi Ben Fekih</td><td>a3e3506e-8dc3-44bf-9346-ebe033369511</td><td>0,00</td><td>45,92</td><td>0,00</td><td>-20,00</td><td>0,00</td><td>-25,92</td><td>0,00</td>
+              </tr>
+            
+              <tr>
+                <td>Mohamed Bayrem Allagui</td><td>3fa9207a-e45f-4528-ab42-eb9b2e62dfd1</td><td>0,00</td><td>39,12</td><td>0,00</td><td>-20,00</td><td>0,00</td><td>-19,12</td><td>0,00</td>
+              </tr>
+            
+          </tbody>
+        </table>
+      </div>
+      <textarea id="tab-heetch-tsv" style="display:none;">﻿Chauffeur	ID chauffeur	Solde initial	Revenus net	Ajustements	Espèces collectées	Paiement dette	Versement flotte	Solde final à verser
+Robert-Ionut Neagu	412e4c99-81a8-4cca-a01c-a7136e4965e9	-8,84	51,13	0,00	-70,50	0,00	0,00	-28,21
+Brandon Louissaint	8726321e-1a99-45b6-b394-ed1bae3c314d	0,00	25,20	0,00	-36,00	0,00	0,00	-10,80
+Mohamed Aloui	17718ea5-13f3-4b88-8d54-c8c53a4f92b0	0,00	8,20	0,00	-10,00	0,00	0,00	-1,80
+Mohamed Fehdi Ben Fekih	a3e3506e-8dc3-44bf-9346-ebe033369511	0,00	45,92	0,00	-20,00	0,00	-25,92	0,00
+Mohamed Bayrem Allagui	3fa9207a-e45f-4528-ab42-eb9b2e62dfd1	0,00	39,12	0,00	-20,00	0,00	-19,12	0,00</textarea>
+    </div>
+  
+    <div id="tab-drivers" class="panel ">
+      
+
+      <div class="actions-bar">
+        <div>
+          <button class="btn-copy" onclick="copyTable('tab-drivers-tsv', 'alert-tab-drivers')">
+            📋 Copier cet onglet pour Google Sheets (Ctrl+C direct)
+          </button>
+          <span id="alert-tab-drivers" class="copy-alert">✓ Copié dans le presse-papier ! Faites Ctrl+V dans Google Sheets</span>
+        </div>
+        <div style="color: var(--text-muted); font-size: 13px;">
+          Fichier généré : <code>GoogleSheets_Chauffeurs_Flotte.csv</code> (166 lignes)
+        </div>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>N°</th><th>Statut</th><th>Prénom</th><th>Nom</th><th>Téléphone</th><th>Email</th><th>Ville</th><th>Immatriculation</th><th>Modèle Véhicule</th><th>Carte VTC</th><th>SIREN</th><th>Plateformes</th><th>Redevance Flotte (€)</th><th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>1</td><td>Docs en attente</td><td>Maayoufi</td><td> amor </td><td>0749096470</td><td>cromentreprise@gmail.com</td><td>Marseille </td><td>HG480ZM</td><td>Toyota corolla touring sport </td><td></td><td></td><td>BOLT, HEETCH, UBER</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>2</td><td>rattache</td><td>Mohamed Aloui</td><td>17718ea5-13f3-4b88-8d54-c8c53a4f92b0</td><td>0,00</td><td>8,20</td><td>0,00</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>3</td><td>rattache</td><td>Mohamed Bayrem Allagui</td><td>3fa9207a-e45f-4528-ab42-eb9b2e62dfd1</td><td>0,00</td><td>39,12</td><td>0,00</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>4</td><td>rattache</td><td>Robert-Ionut Neagu</td><td>412e4c99-81a8-4cca-a01c-a7136e4965e9</td><td>-8,84</td><td>51,13</td><td>0,00</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>5</td><td>rattache</td><td>Brandon Louissaint</td><td>8726321e-1a99-45b6-b394-ed1bae3c314d</td><td>0,00</td><td>25,20</td><td>0,00</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>6</td><td>rattache</td><td>Mohamed Fehdi Ben Fekih</td><td>a3e3506e-8dc3-44bf-9346-ebe033369511</td><td>0,00</td><td>45,92</td><td>0,00</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>7</td><td>rattache</td><td>Abdoul Azize MOHAMED SAFIR</td><td>abazizsafir.pro@gmail.com</td><td>+33761529386</td><td>224.70</td><td>0.00</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>8</td><td>Actif</td><td>Abdoulah</td><td>Abbdi</td><td>+33664137913</td><td>abbdi.abdoulah1@gmail.com</td><td>Paris (Île-de-France)</td><td>EK-102-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024003</td><td>948000002</td><td>BOLT, UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>9</td><td>rattache</td><td>705b20fb-6418-46eb-b0cb-189185267480</td><td>ABDALLAH</td><td>HAMZI</td><td>1073.08</td><td>1055.85</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.24</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>10</td><td>rattache</td><td>c5fc6a45-db9e-4b52-a26f-407ad04c339e</td><td>Abdel Mouamane</td><td>Chelaif</td><td>1122.41</td><td>1070.22</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.40</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>11</td><td>rattache</td><td>a53484f4-ce4a-4cbb-9b3a-8652f25c1afa</td><td>Abdelaziz</td><td>Guerfi</td><td>1061.47</td><td>1043.77</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.04</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>12</td><td>rattache</td><td>c3bc3abe-643a-4431-ab51-8c06ede4b462</td><td>ABDOUL AZIZE</td><td>MOHAMED SAFIR</td><td>101.56</td><td>101.56</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.04</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>13</td><td>rattache</td><td>581f0c82-a5b6-4157-9e93-37b2ad6f35e6</td><td>ADEL</td><td>BENABDELOUAHED</td><td>642.95</td><td>620.10</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.24</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>14</td><td>Actif</td><td>Mohammed</td><td>Adel Benabdelouahed</td><td></td><td>mohammed.adel benabdelouahed@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>BOLT</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>15</td><td>rattache</td><td>Mohammed Adel benabdelouahed</td><td>adelbenan@gmail.com</td><td>+33782790937</td><td>263.60</td><td>166.70</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>16</td><td>Actif</td><td>Farid</td><td>Adkhis</td><td></td><td>farid.adkhis@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>17</td><td>rattache</td><td>96060c6f-36f8-4ff9-a6c0-92bc45a19075</td><td>Ahmed</td><td>Kherfouche</td><td>536.50</td><td>527.24</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.08</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>18</td><td>rattache</td><td>e39f0ec7-249a-4d20-a228-c5182e032e26</td><td>AINA</td><td>RAHARIMANANTSOA</td><td>1.00</td><td>Paris</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>19</td><td>Actif</td><td>Sofiane</td><td>Akli</td><td></td><td>sofiane.akli@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>20</td><td>rattache</td><td>771ff113-4690-410d-bc41-5b5ca3bb2040</td><td>Ali</td><td>Kara</td><td>615.32</td><td>588.50</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.32</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>21</td><td>rattache</td><td>e476a2ba-2a1b-43c9-bbc4-cf7e93c83986</td><td>Ali</td><td>Alouani</td><td>994.20</td><td>972.86</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.16</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>22</td><td>rattache</td><td>Ali Alouani</td><td>ali.alouani.95@gmail.com</td><td>+33618122054</td><td>1298.30</td><td>673.00</td><td></td><td>Berline VTC Conforme</td><td></td><td>7.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>23</td><td>rattache</td><td>Ali Kara</td><td>ali1978kara@hotmail.fr</td><td>+33695644791</td><td>760.50</td><td>742.50</td><td></td><td>Berline VTC Conforme</td><td></td><td>9.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>24</td><td>Actif</td><td>Ali</td><td>Alouani</td><td>+33618122054</td><td>ali.alouani.95@gmail.com</td><td>Paris (Île-de-France)</td><td>EK-105-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024006</td><td>948000005</td><td>BOLT, UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>25</td><td>Actif</td><td>Mohamed</td><td>Aloui</td><td>+33600000027</td><td>mohamed.aloui@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-126-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024027</td><td>948000026</td><td>UBER</td><td>70 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>26</td><td>Actif</td><td>Brahim</td><td>Aloui</td><td>+33600000012</td><td>brahim.aloui@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-111-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024012</td><td>948000011</td><td>UBER, BOLT</td><td>70 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>27</td><td>rattache</td><td>brahim aloui</td><td>alouibrahim@ymail.com</td><td>+33624959758</td><td>293.92</td><td>249.50</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>28</td><td>Actif</td><td>Christopher</td><td>Andrew Mongis</td><td></td><td>christopher.andrew mongis@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>29</td><td>rattache</td><td>5fb339a5-f955-44c6-8a50-6970397bb753</td><td>ASMA</td><td>KISSI</td><td>80.12</td><td>79.75</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.04</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>30</td><td>rattache</td><td>42bc51e5-9514-4e9d-81ce-e7db3c6a2682</td><td>Aymen</td><td>Ltifi</td><td>1029.63</td><td>1021.46</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.20</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>31</td><td>Actif</td><td>Younoussa</td><td>Bah</td><td>+33600000042</td><td>younoussa.bah@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-141-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024042</td><td>948000041</td><td>UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>32</td><td>Actif</td><td>Alhassane</td><td>Balde</td><td></td><td>alhassane.balde@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 40).</td>
+              </tr>
+            
+              <tr>
+                <td>33</td><td>Actif</td><td>Mohamed</td><td>Bayrem Allagui</td><td></td><td>mohamed.bayrem allagui@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>BOLT</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>34</td><td>rattache</td><td>Mohamed Bayrem Allagui</td><td>bayrouma18@gmail.com</td><td>+33621478333</td><td>717.92</td><td>322.20</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>35</td><td>rattache</td><td>a0e498bc-3c9b-4c82-bc49-18718ccca9f0</td><td>Bechir</td><td>Ben Smida</td><td>562.18</td><td>557.73</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.16</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>36</td><td>Actif</td><td>Ratiba</td><td>Beldjoudi</td><td></td><td>ratiba.beldjoudi@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>37</td><td>rattache</td><td>Ratiba GUESRI</td><td>beldjoudilina@hotmail.fr</td><td>+33695084256</td><td>411.10</td><td>65.70</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>38</td><td>Actif</td><td>Bouchaib</td><td>Belkharras</td><td>+33600000011</td><td>bouchaib.belkharras@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-110-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024011</td><td>948000010</td><td>UBER, BOLT</td><td>60 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>39</td><td>Actif</td><td>Idir</td><td>Belkhir</td><td>+33600000018</td><td>idir.belkhir@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-117-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024018</td><td>948000017</td><td>HEETCH, UBER</td><td>70 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>40</td><td>Actif</td><td>Raoul Mansfeld</td><td>Bemma</td><td>+33600000035</td><td>raoul.bemma@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-134-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024035</td><td>948000034</td><td>UBER</td><td>60 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>41</td><td>Actif</td><td>Mohamed Fehdi</td><td>Ben Fekih</td><td>+33662727924</td><td>mfbf@hotmail.fr</td><td>Paris (Île-de-France)</td><td>EK-127-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024028</td><td>948000027</td><td>BOLT, UBER, HEETCH</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>42</td><td>Actif</td><td>Bechir</td><td>Ben Smida</td><td>+33600000009</td><td>bechir.bensmida@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-108-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024009</td><td>948000008</td><td>UBER, BOLT</td><td>70 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>43</td><td>Actif</td><td>Adel</td><td>Benabdelouahed</td><td>+33600000004</td><td>adel.benabdelouahed@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-103-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024004</td><td>948000003</td><td>UBER, BOLT</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>44</td><td>Actif</td><td>Elias</td><td>Bihi</td><td>+33600000015</td><td>elias.bihi@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-114-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024015</td><td>948000014</td><td>UBER, BOLT</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>45</td><td>rattache</td><td>3a100ded-7bc6-48d5-80d6-a84676c2ccd9</td><td>Bilel</td><td>Bouhali</td><td>3a100ded-7bc6-48d5-80d6-a84676c2ccd9.bilel@email.com</td><td>Paris</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>46</td><td>Actif</td><td>Mourad</td><td>Bouakkaz</td><td>+33600000029</td><td>mourad.bouakkaz@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-128-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024029</td><td>948000028</td><td>UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>47</td><td>rattache</td><td>Bouchaïb Belkharras</td><td>bouch.bb@hotmail.com</td><td>+33658123002</td><td>744.60</td><td>500.50</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>48</td><td>rattache</td><td>e53dc586-b4b6-4cba-9a6e-8ba2176e56c5</td><td>Bouchaib</td><td>Belkharras</td><td>371.66</td><td>353.54</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.12</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>49</td><td>Actif</td><td>Mehdi</td><td>Bouchnag</td><td></td><td>mehdi.bouchnag@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>BOLT</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>50</td><td>rattache</td><td>Mehdi Bouchnag</td><td>Bouchnagmehdi@yahoo.fr</td><td>+33623577818</td><td>130.30</td><td>128.30</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>51</td><td>Actif</td><td>Fathia</td><td>Boufalgha</td><td></td><td>fathia.boufalgha@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>52</td><td>Actif</td><td>Bilel</td><td>Bouhali</td><td>+33600000010</td><td>bilel.bouhali@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-109-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024010</td><td>948000009</td><td>UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>53</td><td>rattache</td><td>8306d593-37dd-4c92-b152-ebf0ca5354b2</td><td>Brahim</td><td>Aloui</td><td>505.01</td><td>497.91</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.28</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>54</td><td>rattache</td><td>376a7dae-410e-4a9f-977a-b8d876cbb322</td><td>BRANDON</td><td>+33 6 00 00 00 00</td><td>376a7dae-410e-4a9f-977a-b8d876cbb322.brandon@email.com</td><td>Paris</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>55</td><td>rattache</td><td>4db066f5-f324-4ce7-bc35-6cdc02744ec9</td><td>Bryan Grégory</td><td>Michaud</td><td>100.45</td><td>100.21</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.04</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>56</td><td>rattache</td><td>Bryan Gregory Michaud</td><td>bryan.michaud11@gmail.com</td><td>+33783633084</td><td>242.50</td><td>173.10</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>57</td><td>Actif</td><td>Osoufi</td><td>Camara</td><td>+33760599135</td><td>camaraosoufi@gmail.com</td><td>Paris (Île-de-France)</td><td>EK-129-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024030</td><td>948000029</td><td>BOLT, UBER, HEETCH</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>58</td><td>Prospect</td><td>Julien</td><td>caro</td><td>0601020304</td><td>julien@gmail.com</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT, HEETCH</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>59</td><td>Actif</td><td>Ryan</td><td>Challab</td><td></td><td>ryan.challab@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>60</td><td>rattache</td><td>Abdel Mouamane CHELAIF</td><td>chelaifmoumen@gmail.com</td><td>+33753606026</td><td>84.30</td><td>84.30</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>0 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>61</td><td>Actif</td><td>Omar</td><td>Chemkhi</td><td></td><td>omar.chemkhi@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>62</td><td>Actif</td><td>Rachid</td><td>Chinoune</td><td>+33619305126</td><td>crtp2023@gmail.com</td><td>Paris (Île-de-France)</td><td>EK-131-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024032</td><td>948000031</td><td>BOLT, UBER</td><td>70 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>63</td><td>rattache</td><td>2d271984-777e-4942-8f22-6c20d8d00036</td><td>Christopher Andrew</td><td>Mongis</td><td>680.49</td><td>676.12</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.12</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>64</td><td>rattache</td><td>Rachid Chinoune</td><td>crtp2023@gmail.com</td><td>+33619305126</td><td>198.90</td><td>146.90</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>65</td><td>rattache</td><td>c96fdca4-dd00-4532-bdd3-8cbce2d7edb5</td><td>Daba</td><td>Gandega</td><td>91.78</td><td>89.35</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>66</td><td>Actif</td><td>Haythem</td><td>Dhifi</td><td>+33612674248</td><td>dhifi.haythem.hd@gmail.com</td><td>Paris (Île-de-France)</td><td>EK-116-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024017</td><td>948000016</td><td>BOLT, UBER</td><td>60 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>67</td><td>rattache</td><td>Haythem Dhifi</td><td>dhifi.haythem.hd@gmail.com</td><td>+33612674248</td><td>343.92</td><td>158.70</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>68</td><td>rattache</td><td>TOTAL</td><td>Doc-6</td><td>-8,84</td><td>169,57</td><td>0,00</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>69</td><td>Actif</td><td>Mohamed</td><td>El Khabazi</td><td></td><td>mohamed.el khabazi@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>BOLT</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>70</td><td>rattache</td><td>Mohamed El Khabazi</td><td>elkhabazimohamed1@gmail.com</td><td>+33784678499</td><td>342.40</td><td>246.70</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>71</td><td>Actif</td><td>Mehmet</td><td>Ergun</td><td>+33782313002</td><td>mht.egn1@icloud.com</td><td>Paris (Île-de-France)</td><td>EK-124-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024025</td><td>948000024</td><td>BOLT, UBER</td><td>60 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>72</td><td>rattache</td><td>fa89767a-12bb-4a95-b1db-5fb71719a940</td><td>FAICAL</td><td>JABRI</td><td>763.73</td><td>751.73</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.20</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>73</td><td>rattache</td><td>Mohamed Aloui</td><td>Fainflash@hotmail.com</td><td>+33762769951</td><td>662.04</td><td>539.70</td><td></td><td>Berline VTC Conforme</td><td></td><td>9.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>74</td><td>rattache</td><td>187b8b07-85d6-4eeb-a866-cb8e3e477a54</td><td>Farid</td><td>Adkhis</td><td>252.95</td><td>251.85</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.04</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>75</td><td>rattache</td><td>66cfb448-2a87-41ba-97f2-f0bb51b9b165</td><td>FATHIA</td><td>BOUFALGHA</td><td>1294.48</td><td>1270.05</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.32</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>76</td><td>Actif</td><td>Salah</td><td>Fitouri</td><td>+33600000037</td><td>salah.fitouri@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-136-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024037</td><td>948000036</td><td>UBER, BOLT</td><td>70 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>77</td><td>rattache</td><td>31da3c25-4390-499d-bc4e-e950d3f52808</td><td>FOUED</td><td>KAROUI</td><td>460.35</td><td>457.51</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.04</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>78</td><td>Actif</td><td>Daba</td><td>Gandega</td><td></td><td>daba.gandega@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>79</td><td>Actif</td><td>Abdelaziz</td><td>Guerfi</td><td></td><td>abdelaziz.guerfi@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>80</td><td>Actif</td><td>Zahia</td><td>Guesri</td><td></td><td>zahia.guesri@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>BOLT</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>81</td><td>Actif</td><td>Ratiba</td><td>Guesri</td><td></td><td>ratiba.guesri@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>BOLT</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>82</td><td>Actif</td><td>Ziaed</td><td>Hamila</td><td>+33650235792</td><td>teezere@outlook.fr</td><td>Paris (Île-de-France)</td><td>EK-142-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024043</td><td>948000042</td><td>BOLT, UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>83</td><td>Actif</td><td>Abdallah</td><td>Hamzi</td><td>+33600000001</td><td>abdallah.hamzi@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-100-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024001</td><td>948000000</td><td>UBER, BOLT</td><td>70 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>84</td><td>rattache</td><td>ce4ca592-3925-46e2-8fcb-326ac5f81577</td><td>Haythem</td><td>Dhifi</td><td>105.87</td><td>105.74</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.08</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>85</td><td>Prospect</td><td>Dahmani</td><td>Hidouche </td><td>0641544136</td><td>hidouchedahmani22@gmail.com</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT, HEETCH</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>86</td><td>rattache</td><td>9ee36418-ed86-45bf-ba00-67457101af89</td><td>Imane</td><td>Sarraj</td><td>460.61</td><td>453.67</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.28</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>87</td><td>rattache</td><td>Imane Sarraj</td><td>imane.sar2009@gmail.com</td><td>+33658430022</td><td>197.20</td><td>131.10</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>88</td><td>rattache</td><td>9a0132ce-06c1-4d0f-82bd-f485d1b7479b</td><td>ISSA</td><td>TANDJIGORA</td><td>201.33</td><td>200.14</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>89</td><td>Actif</td><td>Faical</td><td>Jabri</td><td></td><td>faical.jabri@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>90</td><td>Docs en attente</td><td>GEORGET</td><td>JEROME</td><td>0629420102</td><td>j.georgetjerome@outlook.fr</td><td>CANNES LA BOCCA</td><td></td><td>Sans véhicule</td><td></td><td></td><td>UBER, BOLT, HEETCH</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>91</td><td>Actif</td><td>Ali</td><td>Kara</td><td>+33695644791</td><td>ali1978kara@hotmail.fr</td><td>Paris (Île-de-France)</td><td>EK-106-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024007</td><td>948000006</td><td>BOLT, UBER</td><td>40 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>92</td><td>rattache</td><td>Foued Karoui</td><td>karfoued@gmail.com</td><td>+33625815497</td><td>338.40</td><td>338.40</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>93</td><td>rattache</td><td>66310da7-a454-4902-ba89-dc1ea3fa89af</td><td>Karim</td><td>Sidibe</td><td>730.77</td><td>706.97</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.04</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>94</td><td>Actif</td><td>Foued</td><td>Karoui</td><td>+33600000016</td><td>foued.karoui@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-115-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024016</td><td>948000015</td><td>UBER, BOLT</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>95</td><td>Actif</td><td>Khaled</td><td>Kebli</td><td>+33765512904</td><td>kh.kebli@hotmail.com</td><td>Paris (Île-de-France)</td><td>EK-122-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024023</td><td>948000022</td><td>BOLT, UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>96</td><td>Actif</td><td>Kamel</td><td>Kebli</td><td>+33605882286</td><td>k.kebli@outlook.fr</td><td>Paris (Île-de-France)</td><td>EK-121-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024022</td><td>948000021</td><td>BOLT, UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>97</td><td>rattache</td><td>544038a7-0fbf-48ae-b170-b087c5b50353</td><td>Khalid</td><td>Okeil</td><td>34.13</td><td>33.74</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.08</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>98</td><td>rattache</td><td>Khalid OKEIL</td><td>khalidokeil@outlook.fr</td><td>+33685369354</td><td>78.60</td><td>78.60</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>99</td><td>Actif</td><td>Ramzi</td><td>Khannoussi</td><td>+33682163015</td><td>ziram_k@yahoo.fr</td><td>Paris (Île-de-France)</td><td>EK-133-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024034</td><td>948000033</td><td>BOLT, UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>100</td><td>Actif</td><td>Youcef</td><td>Kherfouche</td><td>+33600000041</td><td>youcef.kherfouche@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-140-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024041</td><td>948000040</td><td>UBER, BOLT</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>101</td><td>Actif</td><td>Ahmed</td><td>Kherfouche</td><td>+33600000005</td><td>ahmed.kherfouche@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-104-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024005</td><td>948000004</td><td>UBER, BOLT</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>102</td><td>rattache</td><td>Youcef Kherfouche</td><td>kherfoucheyoucef@gmail.com</td><td>+33624707164</td><td>399.30</td><td>180.70</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>103</td><td>Actif</td><td>Asma</td><td>Kissi</td><td></td><td>asma.kissi@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>104</td><td>Actif</td><td>Rayen</td><td>Klai</td><td>+33766833146</td><td>rayenvtc@outlook.fr</td><td>Paris (Île-de-France)</td><td>EK-135-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024036</td><td>948000035</td><td>BOLT, UBER</td><td>0 €</td><td>Direction Flotte Nordrive (0€ sans déduction)</td>
+              </tr>
+            
+              <tr>
+                <td>105</td><td>Location Contrat</td><td>Ouissem</td><td>Klai</td><td>+33682163015</td><td>ouissem.klai@gmail.com</td><td>Livry-Gargan (93)</td><td>ET-219-AW</td><td>Toyota Auris (165 545 km)</td><td>Délivré Aulnay 14/07/2026</td><td>88097714500015</td><td>VTC FLOTTE</td><td>231 €</td><td>Contrat Location 1000€/mois, Caution 800€, Full Services (15/07/2026 - 01/07/2027)</td>
+              </tr>
+            
+              <tr>
+                <td>106</td><td>Actif</td><td>Stéphane</td><td>Kouassi</td><td>+33601360917</td><td>koffivillepinte@gmail.com</td><td>Paris (Île-de-France)</td><td>EK-139-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024040</td><td>948000039</td><td>BOLT, UBER, HEETCH</td><td>40 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>107</td><td>Actif</td><td>Samir</td><td>Laazibi</td><td>+33661926124</td><td>laazibisamir@gmail.com</td><td>Paris (Île-de-France)</td><td>EK-137-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024038</td><td>948000037</td><td>BOLT, UBER, HEETCH</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>108</td><td>rattache</td><td>SAMIR LAAZIBI</td><td>laazibisamir@gmail.com</td><td>+33661926124</td><td>12.80</td><td>12.80</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>109</td><td>Actif</td><td>Raed</td><td>Loghmari</td><td>+33652147683</td><td>raed85@hotmail.fr</td><td>Paris (Île-de-France)</td><td>EK-132-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024033</td><td>948000032</td><td>BOLT, UBER</td><td>60 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>110</td><td>Actif</td><td>Brandon Jean Jimmy</td><td>Louissaint</td><td>+33635481157</td><td>louissaintbrandon@hotmail.com</td><td>Paris (Île-de-France)</td><td>EK-112-ND</td><td>Location Flotte Nordrive (360€/sem)</td><td>VTC-IDF-2024013</td><td>948000012</td><td>BOLT, UBER, HEETCH</td><td>360 €</td><td>Location véhicule Nordrive (360€/semaine)</td>
+              </tr>
+            
+              <tr>
+                <td>111</td><td>rattache</td><td>JEAN-JIMMY</td><td>LOUISSAINT</td><td>252.52</td><td>248.40</td><td>2.12</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.12</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>112</td><td>rattache</td><td>Brandon Jean Jimmy Louissaint</td><td>louissaintbrandon@hotmail.com</td><td>+33635481157</td><td>1081.20</td><td>761.40</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>113</td><td>Actif</td><td>Aymen</td><td>Ltifi</td><td>+33760731822</td><td>ltifiservices@outlook.com</td><td>Paris (Île-de-France)</td><td>EK-107-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024008</td><td>948000007</td><td>BOLT, UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>114</td><td>rattache</td><td>Aymen Ltifi</td><td>ltifiservices@outlook.com</td><td>+33760731822</td><td>119.20</td><td>114.80</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>115</td><td>Actif</td><td>Adam</td><td>Machtou</td><td></td><td>adam.machtou@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>BOLT</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>116</td><td>rattache</td><td>Adam Machtou</td><td>machtou.adam@gmail.com</td><td>+33618757203</td><td>306.20</td><td>258.30</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>117</td><td>rattache</td><td>8f960007-a5d4-4ab4-b73e-224304f9861f</td><td>MEHDI</td><td>BOUCHNAG</td><td>684.26</td><td>666.80</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.24</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>118</td><td>rattache</td><td>7ed4458a-eaaa-4e6d-98f6-24871c279a8a</td><td>MEHMET</td><td>ERGUN</td><td>230.10</td><td>229.52</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.08</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>119</td><td>rattache</td><td>Mohamed Fehdi Ben-Fekih</td><td>mfbf@hotmail.fr</td><td>+33662727924</td><td>191.10</td><td>81.30</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>120</td><td>rattache</td><td>Mehmet Ergun</td><td>Mht.Egn1@icloud.com</td><td>+33782313002</td><td>502.30</td><td>305.60</td><td></td><td>Berline VTC Conforme</td><td></td><td>9.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>121</td><td>Actif</td><td>Bryan Grégory</td><td>Michaud</td><td>+33783633084</td><td>bryan.michaud11@gmail.com</td><td>Paris (Île-de-France)</td><td>EK-113-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024014</td><td>948000013</td><td>BOLT, UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>122</td><td>Actif</td><td>Jovan</td><td>Milic</td><td>+33695405086</td><td>jovan93@outlook.fr</td><td>Paris (Île-de-France)</td><td>EK-120-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024021</td><td>948000020</td><td>BOLT, UBER</td><td>60 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>123</td><td>rattache</td><td>9501a412-f396-4d5e-80e6-05d9b3276311</td><td>Mohamed</td><td>El Khabazi</td><td>1344.86</td><td>1331.80</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.44</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>124</td><td>rattache</td><td>a2f299ae-f623-4841-935b-52caf47aef66</td><td>MOHAMED</td><td>ALOUi</td><td>551.80</td><td>534.47</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.16</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>125</td><td>rattache</td><td>59899875-c5d2-40a1-996e-1277a84e76ed</td><td>MOHAMED FEHDI</td><td>BEN-FEKIH</td><td>324.96</td><td>311.74</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>126</td><td>Actif</td><td>Abdoul Azize</td><td>Mohamed Safir</td><td>+33600000002</td><td>safir.abdoul@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-101-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024002</td><td>948000001</td><td>UBER</td><td>70 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>127</td><td>Actif</td><td>Abdel</td><td>Mouamane Chelaif</td><td></td><td>abdel.mouamane chelaif@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>BOLT</td><td>0 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>128</td><td>rattache</td><td>d409253e-52f5-4816-9e78-6b890db203cb</td><td>Mourad</td><td>Bouakkaz</td><td>917.56</td><td>876.62</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.24</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>129</td><td>Actif</td><td>Robert-ionut</td><td>Neagu</td><td></td><td>robert ionut.neagu@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>BOLT</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>130</td><td>Actif</td><td>Siré</td><td>Niakaté</td><td>+33764005951</td><td>sireniakate71@gmail.com</td><td>Paris (Île-de-France)</td><td>EK-138-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024039</td><td>948000038</td><td>BOLT, UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>131</td><td>rattache</td><td>44575ef7-0936-445e-9dad-2325f7d54d1f</td><td>Noureddine</td><td>Tattouche</td><td>641.71</td><td>634.38</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.20</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>132</td><td>Actif</td><td>Khalid</td><td>Okeil</td><td>+33685369354</td><td>khalidokeil@outlook.fr</td><td>Paris (Île-de-France)</td><td>EK-123-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024024</td><td>948000023</td><td>BOLT, UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>133</td><td>rattache</td><td>39e958a9-e12f-4199-ba5a-460c3e2d9187</td><td>Omar</td><td>Chemkhi</td><td>288.97</td><td>284.04</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.40</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>134</td><td>Actif</td><td>Ryan</td><td>Ouali Challab</td><td></td><td>ryan.ouali challab@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>BOLT</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>135</td><td>rattache</td><td>bac2a019-9062-4116-9085-6da102d70c5d</td><td>OUSMANE</td><td>SYLLA</td><td>123.35</td><td>123.11</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.04</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>136</td><td>rattache</td><td>bce74b3a-5d74-4cb9-ab0a-c6746f1ccdd8</td><td>rachid</td><td>CHINOUNE</td><td>428.80</td><td>388.46</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.32</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>137</td><td>rattache</td><td>cadfccc3-9db9-4c32-bbf9-72ba92144aa8</td><td>Raed</td><td>Loghmari</td><td>28.06</td><td>27.94</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>138</td><td>rattache</td><td>Raed Loghmari</td><td>raed85@hotmail.fr</td><td>+33652147683</td><td>606.50</td><td>115.80</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>139</td><td>Actif</td><td>Aina</td><td>Raharimanantsoa</td><td></td><td>aina.raharimanantsoa@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>140</td><td>rattache</td><td>7e6b9ac8-24f0-4325-902e-2631b16f1f54</td><td>Ramzi</td><td>Khannoussi</td><td>438.78</td><td>425.99</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.20</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>141</td><td>rattache</td><td>01e09944-7e3c-456e-87ec-7c45c1b3cc26</td><td>Raoul Mansfeld</td><td>Bemma</td><td>433.87</td><td>419.26</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.20</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>142</td><td>rattache</td><td>e4157312-32c8-469d-b099-30f3b16cbe69</td><td>Ratiba</td><td>Beldjoudi</td><td>132.03</td><td>128.50</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>143</td><td>rattache</td><td>eeffcd94-27a8-4b15-82e4-42996a50bc84</td><td>Rayen</td><td>Klai</td><td>66.15</td><td>66.06</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>144</td><td>rattache</td><td>Rayen Klai</td><td>rayenvtc@outlook.fr</td><td>+33766833146</td><td>195.40</td><td>141.10</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>145</td><td>Actif</td><td>Merouane</td><td>Remam</td><td>+33656847648</td><td>midoremam@hotmail.com</td><td>Paris (Île-de-France)</td><td>EK-125-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024026</td><td>948000025</td><td>BOLT</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>146</td><td>rattache</td><td>ba779469-ba34-4105-ae7e-5da93a3217f9</td><td>Robert-Ionut</td><td>Neagu</td><td>620.80</td><td>602.72</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.16</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>147</td><td>rattache</td><td>Robert-Ionut Neagu</td><td>robertneagu44@gmail.com</td><td>+33656859258</td><td>240.80</td><td>179.50</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>148</td><td>rattache</td><td>61931f3a-cf60-42e3-9ef6-52108004b6d6</td><td>Ryan</td><td>Challab</td><td>853.61</td><td>488.56</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.12</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>149</td><td>rattache</td><td>Ryan Ouali Challab</td><td>ryanchallab93600@gmail.com</td><td>+33768419070</td><td>173.50</td><td>172.50</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>150</td><td>rattache</td><td>ed046710-cb81-4e10-8981-2408f8f6d7a3</td><td>Samir</td><td>Laazibi</td><td>245.42</td><td>231.97</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>151</td><td>Actif</td><td>Imane</td><td>Sarraj</td><td>+33600000019</td><td>imane.sarraj@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-118-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024019</td><td>948000018</td><td>UBER, BOLT</td><td>60 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>152</td><td>Actif</td><td>Karim</td><td>Sidibe</td><td></td><td>karim.sidibe@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>153</td><td>rattache</td><td>983c63ed-2f31-43bd-b79f-b677ca5065fa</td><td>SIRE CYRIL</td><td>NIAKATE</td><td>1688.69</td><td>1673.61</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.12</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>154</td><td>rattache</td><td>Siré Niakaté</td><td>sireniakate71@gmail.com</td><td>+33764005951</td><td>423.10</td><td>223.90</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>155</td><td>rattache</td><td>aaab1c40-042f-4a3c-916b-e6b59e4c0f44</td><td>Sofiane</td><td>Akli</td><td>1325.70</td><td>1238.63</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.08</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>156</td><td>Actif</td><td>Ousmane</td><td>Sylla</td><td>+33600000031</td><td>ousmane.sylla@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td>EK-130-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024031</td><td>948000030</td><td>UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>157</td><td>Actif</td><td>Issa</td><td>Tandjigora</td><td>+33767662529</td><td>issasenypro@gmail.com</td><td>Paris (Île-de-France)</td><td>EK-119-ND</td><td>Berline VTC Conforme</td><td>VTC-IDF-2024020</td><td>948000019</td><td>BOLT, UBER</td><td>50 €</td><td>Chauffeur historique de la flotte Nordrive (Gestion manuelle)</td>
+              </tr>
+            
+              <tr>
+                <td>158</td><td>Actif</td><td>Noureddine</td><td>Tattouche</td><td></td><td>noureddine.tattouche@nordrive-flotte.fr</td><td>Paris (Île-de-France)</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>BOLT</td><td>50 €</td><td>Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).</td>
+              </tr>
+            
+              <tr>
+                <td>159</td><td>rattache</td><td>Noureddine Tattouche</td><td>tattouche.noureddine@yahoo.com</td><td>+33675941291</td><td>373.90</td><td>261.30</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>160</td><td>rattache</td><td>Ziaed Hamila</td><td>Teezere@outlook.fr</td><td>+33650235792</td><td>835.40</td><td>810.40</td><td></td><td>Berline VTC Conforme</td><td></td><td>25.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>161</td><td>rattache</td><td>4afc3041-1d5f-48ca-976b-6e56d4e71b8d</td><td>Youcef</td><td>Kherfouche</td><td>122.45</td><td>121.58</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.04</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>162</td><td>rattache</td><td>3adffadf-6d60-4a2f-a6e3-4ca3ffe3a72c</td><td>YOUNOUSSA</td><td>BAH</td><td>772.08</td><td>767.45</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>163</td><td>rattache</td><td>a60930ad-c1e7-4984-9893-e4bfe2db96b0</td><td>Zahia</td><td>Guesri</td><td>156.32</td><td>151.22</td><td></td><td>Berline VTC Conforme</td><td></td><td>-0.03</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>164</td><td>rattache</td><td>Zahia Guesri</td><td>zaza.guess@hotmail.fr</td><td>+33669354856</td><td>455.92</td><td>304.30</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>165</td><td>rattache</td><td>c301c784-1c1d-44fd-8106-615e30556e7e</td><td>ZIAED</td><td>HAMILA</td><td>572.30</td><td>559.51</td><td></td><td>Berline VTC Conforme</td><td></td><td></td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+              <tr>
+                <td>166</td><td>rattache</td><td>Ramzi Khannoussi</td><td>ziram_k@yahoo.fr</td><td>+33682163015</td><td>497.80</td><td>295.70</td><td></td><td>Berline VTC Conforme</td><td></td><td>0.00</td><td>UBER, BOLT</td><td>50 €</td><td></td>
+              </tr>
+            
+          </tbody>
+        </table>
+      </div>
+      <textarea id="tab-drivers-tsv" style="display:none;">﻿N°	Statut	Prénom	Nom	Téléphone	Email	Ville	Immatriculation	Modèle Véhicule	Carte VTC	SIREN	Plateformes	Redevance Flotte (€)	Notes
+1	Docs en attente	Maayoufi	 amor 	0749096470	cromentreprise@gmail.com	Marseille 	HG480ZM	Toyota corolla touring sport 			BOLT, HEETCH, UBER	50 €	
+2	rattache	Mohamed Aloui	17718ea5-13f3-4b88-8d54-c8c53a4f92b0	0,00	8,20	0,00		Berline VTC Conforme			UBER, BOLT	50 €	
+3	rattache	Mohamed Bayrem Allagui	3fa9207a-e45f-4528-ab42-eb9b2e62dfd1	0,00	39,12	0,00		Berline VTC Conforme			UBER, BOLT	50 €	
+4	rattache	Robert-Ionut Neagu	412e4c99-81a8-4cca-a01c-a7136e4965e9	-8,84	51,13	0,00		Berline VTC Conforme			UBER, BOLT	50 €	
+5	rattache	Brandon Louissaint	8726321e-1a99-45b6-b394-ed1bae3c314d	0,00	25,20	0,00		Berline VTC Conforme			UBER, BOLT	50 €	
+6	rattache	Mohamed Fehdi Ben Fekih	a3e3506e-8dc3-44bf-9346-ebe033369511	0,00	45,92	0,00		Berline VTC Conforme			UBER, BOLT	50 €	
+7	rattache	Abdoul Azize MOHAMED SAFIR	abazizsafir.pro@gmail.com	+33761529386	224.70	0.00		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+8	Actif	Abdoulah	Abbdi	+33664137913	abbdi.abdoulah1@gmail.com	Paris (Île-de-France)	EK-102-ND	Berline VTC Conforme	VTC-IDF-2024003	948000002	BOLT, UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+9	rattache	705b20fb-6418-46eb-b0cb-189185267480	ABDALLAH	HAMZI	1073.08	1055.85		Berline VTC Conforme		-0.24	UBER, BOLT	50 €	
+10	rattache	c5fc6a45-db9e-4b52-a26f-407ad04c339e	Abdel Mouamane	Chelaif	1122.41	1070.22		Berline VTC Conforme		-0.40	UBER, BOLT	50 €	
+11	rattache	a53484f4-ce4a-4cbb-9b3a-8652f25c1afa	Abdelaziz	Guerfi	1061.47	1043.77		Berline VTC Conforme		-0.04	UBER, BOLT	50 €	
+12	rattache	c3bc3abe-643a-4431-ab51-8c06ede4b462	ABDOUL AZIZE	MOHAMED SAFIR	101.56	101.56		Berline VTC Conforme		-0.04	UBER, BOLT	50 €	
+13	rattache	581f0c82-a5b6-4157-9e93-37b2ad6f35e6	ADEL	BENABDELOUAHED	642.95	620.10		Berline VTC Conforme		-0.24	UBER, BOLT	50 €	
+14	Actif	Mohammed	Adel Benabdelouahed		mohammed.adel benabdelouahed@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			BOLT	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+15	rattache	Mohammed Adel benabdelouahed	adelbenan@gmail.com	+33782790937	263.60	166.70		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+16	Actif	Farid	Adkhis		farid.adkhis@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+17	rattache	96060c6f-36f8-4ff9-a6c0-92bc45a19075	Ahmed	Kherfouche	536.50	527.24		Berline VTC Conforme		-0.08	UBER, BOLT	50 €	
+18	rattache	e39f0ec7-249a-4d20-a228-c5182e032e26	AINA	RAHARIMANANTSOA	1.00	Paris		Berline VTC Conforme			UBER, BOLT	50 €	
+19	Actif	Sofiane	Akli		sofiane.akli@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+20	rattache	771ff113-4690-410d-bc41-5b5ca3bb2040	Ali	Kara	615.32	588.50		Berline VTC Conforme		-0.32	UBER, BOLT	50 €	
+21	rattache	e476a2ba-2a1b-43c9-bbc4-cf7e93c83986	Ali	Alouani	994.20	972.86		Berline VTC Conforme		-0.16	UBER, BOLT	50 €	
+22	rattache	Ali Alouani	ali.alouani.95@gmail.com	+33618122054	1298.30	673.00		Berline VTC Conforme		7.00	UBER, BOLT	50 €	
+23	rattache	Ali Kara	ali1978kara@hotmail.fr	+33695644791	760.50	742.50		Berline VTC Conforme		9.00	UBER, BOLT	50 €	
+24	Actif	Ali	Alouani	+33618122054	ali.alouani.95@gmail.com	Paris (Île-de-France)	EK-105-ND	Berline VTC Conforme	VTC-IDF-2024006	948000005	BOLT, UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+25	Actif	Mohamed	Aloui	+33600000027	mohamed.aloui@nordrive-flotte.fr	Paris (Île-de-France)	EK-126-ND	Berline VTC Conforme	VTC-IDF-2024027	948000026	UBER	70 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+26	Actif	Brahim	Aloui	+33600000012	brahim.aloui@nordrive-flotte.fr	Paris (Île-de-France)	EK-111-ND	Berline VTC Conforme	VTC-IDF-2024012	948000011	UBER, BOLT	70 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+27	rattache	brahim aloui	alouibrahim@ymail.com	+33624959758	293.92	249.50		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+28	Actif	Christopher	Andrew Mongis		christopher.andrew mongis@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+29	rattache	5fb339a5-f955-44c6-8a50-6970397bb753	ASMA	KISSI	80.12	79.75		Berline VTC Conforme		-0.04	UBER, BOLT	50 €	
+30	rattache	42bc51e5-9514-4e9d-81ce-e7db3c6a2682	Aymen	Ltifi	1029.63	1021.46		Berline VTC Conforme		-0.20	UBER, BOLT	50 €	
+31	Actif	Younoussa	Bah	+33600000042	younoussa.bah@nordrive-flotte.fr	Paris (Île-de-France)	EK-141-ND	Berline VTC Conforme	VTC-IDF-2024042	948000041	UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+32	Actif	Alhassane	Balde		alhassane.balde@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 40).
+33	Actif	Mohamed	Bayrem Allagui		mohamed.bayrem allagui@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			BOLT	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+34	rattache	Mohamed Bayrem Allagui	bayrouma18@gmail.com	+33621478333	717.92	322.20		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+35	rattache	a0e498bc-3c9b-4c82-bc49-18718ccca9f0	Bechir	Ben Smida	562.18	557.73		Berline VTC Conforme		-0.16	UBER, BOLT	50 €	
+36	Actif	Ratiba	Beldjoudi		ratiba.beldjoudi@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+37	rattache	Ratiba GUESRI	beldjoudilina@hotmail.fr	+33695084256	411.10	65.70		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+38	Actif	Bouchaib	Belkharras	+33600000011	bouchaib.belkharras@nordrive-flotte.fr	Paris (Île-de-France)	EK-110-ND	Berline VTC Conforme	VTC-IDF-2024011	948000010	UBER, BOLT	60 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+39	Actif	Idir	Belkhir	+33600000018	idir.belkhir@nordrive-flotte.fr	Paris (Île-de-France)	EK-117-ND	Berline VTC Conforme	VTC-IDF-2024018	948000017	HEETCH, UBER	70 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+40	Actif	Raoul Mansfeld	Bemma	+33600000035	raoul.bemma@nordrive-flotte.fr	Paris (Île-de-France)	EK-134-ND	Berline VTC Conforme	VTC-IDF-2024035	948000034	UBER	60 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+41	Actif	Mohamed Fehdi	Ben Fekih	+33662727924	mfbf@hotmail.fr	Paris (Île-de-France)	EK-127-ND	Berline VTC Conforme	VTC-IDF-2024028	948000027	BOLT, UBER, HEETCH	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+42	Actif	Bechir	Ben Smida	+33600000009	bechir.bensmida@nordrive-flotte.fr	Paris (Île-de-France)	EK-108-ND	Berline VTC Conforme	VTC-IDF-2024009	948000008	UBER, BOLT	70 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+43	Actif	Adel	Benabdelouahed	+33600000004	adel.benabdelouahed@nordrive-flotte.fr	Paris (Île-de-France)	EK-103-ND	Berline VTC Conforme	VTC-IDF-2024004	948000003	UBER, BOLT	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+44	Actif	Elias	Bihi	+33600000015	elias.bihi@nordrive-flotte.fr	Paris (Île-de-France)	EK-114-ND	Berline VTC Conforme	VTC-IDF-2024015	948000014	UBER, BOLT	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+45	rattache	3a100ded-7bc6-48d5-80d6-a84676c2ccd9	Bilel	Bouhali	3a100ded-7bc6-48d5-80d6-a84676c2ccd9.bilel@email.com	Paris		Berline VTC Conforme			UBER, BOLT	50 €	
+46	Actif	Mourad	Bouakkaz	+33600000029	mourad.bouakkaz@nordrive-flotte.fr	Paris (Île-de-France)	EK-128-ND	Berline VTC Conforme	VTC-IDF-2024029	948000028	UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+47	rattache	Bouchaïb Belkharras	bouch.bb@hotmail.com	+33658123002	744.60	500.50		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+48	rattache	e53dc586-b4b6-4cba-9a6e-8ba2176e56c5	Bouchaib	Belkharras	371.66	353.54		Berline VTC Conforme		-0.12	UBER, BOLT	50 €	
+49	Actif	Mehdi	Bouchnag		mehdi.bouchnag@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			BOLT	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+50	rattache	Mehdi Bouchnag	Bouchnagmehdi@yahoo.fr	+33623577818	130.30	128.30		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+51	Actif	Fathia	Boufalgha		fathia.boufalgha@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+52	Actif	Bilel	Bouhali	+33600000010	bilel.bouhali@nordrive-flotte.fr	Paris (Île-de-France)	EK-109-ND	Berline VTC Conforme	VTC-IDF-2024010	948000009	UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+53	rattache	8306d593-37dd-4c92-b152-ebf0ca5354b2	Brahim	Aloui	505.01	497.91		Berline VTC Conforme		-0.28	UBER, BOLT	50 €	
+54	rattache	376a7dae-410e-4a9f-977a-b8d876cbb322	BRANDON	+33 6 00 00 00 00	376a7dae-410e-4a9f-977a-b8d876cbb322.brandon@email.com	Paris		Berline VTC Conforme			UBER, BOLT	50 €	
+55	rattache	4db066f5-f324-4ce7-bc35-6cdc02744ec9	Bryan Grégory	Michaud	100.45	100.21		Berline VTC Conforme		-0.04	UBER, BOLT	50 €	
+56	rattache	Bryan Gregory Michaud	bryan.michaud11@gmail.com	+33783633084	242.50	173.10		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+57	Actif	Osoufi	Camara	+33760599135	camaraosoufi@gmail.com	Paris (Île-de-France)	EK-129-ND	Berline VTC Conforme	VTC-IDF-2024030	948000029	BOLT, UBER, HEETCH	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+58	Prospect	Julien	caro	0601020304	julien@gmail.com	Paris (Île-de-France)		Berline VTC Conforme			UBER, BOLT, HEETCH	50 €	
+59	Actif	Ryan	Challab		ryan.challab@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+60	rattache	Abdel Mouamane CHELAIF	chelaifmoumen@gmail.com	+33753606026	84.30	84.30		Berline VTC Conforme		0.00	UBER, BOLT	0 €	
+61	Actif	Omar	Chemkhi		omar.chemkhi@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+62	Actif	Rachid	Chinoune	+33619305126	crtp2023@gmail.com	Paris (Île-de-France)	EK-131-ND	Berline VTC Conforme	VTC-IDF-2024032	948000031	BOLT, UBER	70 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+63	rattache	2d271984-777e-4942-8f22-6c20d8d00036	Christopher Andrew	Mongis	680.49	676.12		Berline VTC Conforme		-0.12	UBER, BOLT	50 €	
+64	rattache	Rachid Chinoune	crtp2023@gmail.com	+33619305126	198.90	146.90		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+65	rattache	c96fdca4-dd00-4532-bdd3-8cbce2d7edb5	Daba	Gandega	91.78	89.35		Berline VTC Conforme			UBER, BOLT	50 €	
+66	Actif	Haythem	Dhifi	+33612674248	dhifi.haythem.hd@gmail.com	Paris (Île-de-France)	EK-116-ND	Berline VTC Conforme	VTC-IDF-2024017	948000016	BOLT, UBER	60 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+67	rattache	Haythem Dhifi	dhifi.haythem.hd@gmail.com	+33612674248	343.92	158.70		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+68	rattache	TOTAL	Doc-6	-8,84	169,57	0,00		Berline VTC Conforme			UBER, BOLT	50 €	
+69	Actif	Mohamed	El Khabazi		mohamed.el khabazi@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			BOLT	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+70	rattache	Mohamed El Khabazi	elkhabazimohamed1@gmail.com	+33784678499	342.40	246.70		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+71	Actif	Mehmet	Ergun	+33782313002	mht.egn1@icloud.com	Paris (Île-de-France)	EK-124-ND	Berline VTC Conforme	VTC-IDF-2024025	948000024	BOLT, UBER	60 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+72	rattache	fa89767a-12bb-4a95-b1db-5fb71719a940	FAICAL	JABRI	763.73	751.73		Berline VTC Conforme		-0.20	UBER, BOLT	50 €	
+73	rattache	Mohamed Aloui	Fainflash@hotmail.com	+33762769951	662.04	539.70		Berline VTC Conforme		9.00	UBER, BOLT	50 €	
+74	rattache	187b8b07-85d6-4eeb-a866-cb8e3e477a54	Farid	Adkhis	252.95	251.85		Berline VTC Conforme		-0.04	UBER, BOLT	50 €	
+75	rattache	66cfb448-2a87-41ba-97f2-f0bb51b9b165	FATHIA	BOUFALGHA	1294.48	1270.05		Berline VTC Conforme		-0.32	UBER, BOLT	50 €	
+76	Actif	Salah	Fitouri	+33600000037	salah.fitouri@nordrive-flotte.fr	Paris (Île-de-France)	EK-136-ND	Berline VTC Conforme	VTC-IDF-2024037	948000036	UBER, BOLT	70 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+77	rattache	31da3c25-4390-499d-bc4e-e950d3f52808	FOUED	KAROUI	460.35	457.51		Berline VTC Conforme		-0.04	UBER, BOLT	50 €	
+78	Actif	Daba	Gandega		daba.gandega@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+79	Actif	Abdelaziz	Guerfi		abdelaziz.guerfi@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+80	Actif	Zahia	Guesri		zahia.guesri@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			BOLT	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+81	Actif	Ratiba	Guesri		ratiba.guesri@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			BOLT	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+82	Actif	Ziaed	Hamila	+33650235792	teezere@outlook.fr	Paris (Île-de-France)	EK-142-ND	Berline VTC Conforme	VTC-IDF-2024043	948000042	BOLT, UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+83	Actif	Abdallah	Hamzi	+33600000001	abdallah.hamzi@nordrive-flotte.fr	Paris (Île-de-France)	EK-100-ND	Berline VTC Conforme	VTC-IDF-2024001	948000000	UBER, BOLT	70 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+84	rattache	ce4ca592-3925-46e2-8fcb-326ac5f81577	Haythem	Dhifi	105.87	105.74		Berline VTC Conforme		-0.08	UBER, BOLT	50 €	
+85	Prospect	Dahmani	Hidouche 	0641544136	hidouchedahmani22@gmail.com	Paris (Île-de-France)		Berline VTC Conforme			UBER, BOLT, HEETCH	50 €	
+86	rattache	9ee36418-ed86-45bf-ba00-67457101af89	Imane	Sarraj	460.61	453.67		Berline VTC Conforme		-0.28	UBER, BOLT	50 €	
+87	rattache	Imane Sarraj	imane.sar2009@gmail.com	+33658430022	197.20	131.10		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+88	rattache	9a0132ce-06c1-4d0f-82bd-f485d1b7479b	ISSA	TANDJIGORA	201.33	200.14		Berline VTC Conforme			UBER, BOLT	50 €	
+89	Actif	Faical	Jabri		faical.jabri@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+90	Docs en attente	GEORGET	JEROME	0629420102	j.georgetjerome@outlook.fr	CANNES LA BOCCA		Sans véhicule			UBER, BOLT, HEETCH	50 €	
+91	Actif	Ali	Kara	+33695644791	ali1978kara@hotmail.fr	Paris (Île-de-France)	EK-106-ND	Berline VTC Conforme	VTC-IDF-2024007	948000006	BOLT, UBER	40 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+92	rattache	Foued Karoui	karfoued@gmail.com	+33625815497	338.40	338.40		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+93	rattache	66310da7-a454-4902-ba89-dc1ea3fa89af	Karim	Sidibe	730.77	706.97		Berline VTC Conforme		-0.04	UBER, BOLT	50 €	
+94	Actif	Foued	Karoui	+33600000016	foued.karoui@nordrive-flotte.fr	Paris (Île-de-France)	EK-115-ND	Berline VTC Conforme	VTC-IDF-2024016	948000015	UBER, BOLT	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+95	Actif	Khaled	Kebli	+33765512904	kh.kebli@hotmail.com	Paris (Île-de-France)	EK-122-ND	Berline VTC Conforme	VTC-IDF-2024023	948000022	BOLT, UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+96	Actif	Kamel	Kebli	+33605882286	k.kebli@outlook.fr	Paris (Île-de-France)	EK-121-ND	Berline VTC Conforme	VTC-IDF-2024022	948000021	BOLT, UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+97	rattache	544038a7-0fbf-48ae-b170-b087c5b50353	Khalid	Okeil	34.13	33.74		Berline VTC Conforme		-0.08	UBER, BOLT	50 €	
+98	rattache	Khalid OKEIL	khalidokeil@outlook.fr	+33685369354	78.60	78.60		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+99	Actif	Ramzi	Khannoussi	+33682163015	ziram_k@yahoo.fr	Paris (Île-de-France)	EK-133-ND	Berline VTC Conforme	VTC-IDF-2024034	948000033	BOLT, UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+100	Actif	Youcef	Kherfouche	+33600000041	youcef.kherfouche@nordrive-flotte.fr	Paris (Île-de-France)	EK-140-ND	Berline VTC Conforme	VTC-IDF-2024041	948000040	UBER, BOLT	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+101	Actif	Ahmed	Kherfouche	+33600000005	ahmed.kherfouche@nordrive-flotte.fr	Paris (Île-de-France)	EK-104-ND	Berline VTC Conforme	VTC-IDF-2024005	948000004	UBER, BOLT	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+102	rattache	Youcef Kherfouche	kherfoucheyoucef@gmail.com	+33624707164	399.30	180.70		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+103	Actif	Asma	Kissi		asma.kissi@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+104	Actif	Rayen	Klai	+33766833146	rayenvtc@outlook.fr	Paris (Île-de-France)	EK-135-ND	Berline VTC Conforme	VTC-IDF-2024036	948000035	BOLT, UBER	0 €	Direction Flotte Nordrive (0€ sans déduction)
+105	Location Contrat	Ouissem	Klai	+33682163015	ouissem.klai@gmail.com	Livry-Gargan (93)	ET-219-AW	Toyota Auris (165 545 km)	Délivré Aulnay 14/07/2026	88097714500015	VTC FLOTTE	231 €	Contrat Location 1000€/mois, Caution 800€, Full Services (15/07/2026 - 01/07/2027)
+106	Actif	Stéphane	Kouassi	+33601360917	koffivillepinte@gmail.com	Paris (Île-de-France)	EK-139-ND	Berline VTC Conforme	VTC-IDF-2024040	948000039	BOLT, UBER, HEETCH	40 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+107	Actif	Samir	Laazibi	+33661926124	laazibisamir@gmail.com	Paris (Île-de-France)	EK-137-ND	Berline VTC Conforme	VTC-IDF-2024038	948000037	BOLT, UBER, HEETCH	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+108	rattache	SAMIR LAAZIBI	laazibisamir@gmail.com	+33661926124	12.80	12.80		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+109	Actif	Raed	Loghmari	+33652147683	raed85@hotmail.fr	Paris (Île-de-France)	EK-132-ND	Berline VTC Conforme	VTC-IDF-2024033	948000032	BOLT, UBER	60 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+110	Actif	Brandon Jean Jimmy	Louissaint	+33635481157	louissaintbrandon@hotmail.com	Paris (Île-de-France)	EK-112-ND	Location Flotte Nordrive (360€/sem)	VTC-IDF-2024013	948000012	BOLT, UBER, HEETCH	360 €	Location véhicule Nordrive (360€/semaine)
+111	rattache	JEAN-JIMMY	LOUISSAINT	252.52	248.40	2.12		Berline VTC Conforme		-0.12	UBER, BOLT	50 €	
+112	rattache	Brandon Jean Jimmy Louissaint	louissaintbrandon@hotmail.com	+33635481157	1081.20	761.40		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+113	Actif	Aymen	Ltifi	+33760731822	ltifiservices@outlook.com	Paris (Île-de-France)	EK-107-ND	Berline VTC Conforme	VTC-IDF-2024008	948000007	BOLT, UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+114	rattache	Aymen Ltifi	ltifiservices@outlook.com	+33760731822	119.20	114.80		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+115	Actif	Adam	Machtou		adam.machtou@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			BOLT	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+116	rattache	Adam Machtou	machtou.adam@gmail.com	+33618757203	306.20	258.30		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+117	rattache	8f960007-a5d4-4ab4-b73e-224304f9861f	MEHDI	BOUCHNAG	684.26	666.80		Berline VTC Conforme		-0.24	UBER, BOLT	50 €	
+118	rattache	7ed4458a-eaaa-4e6d-98f6-24871c279a8a	MEHMET	ERGUN	230.10	229.52		Berline VTC Conforme		-0.08	UBER, BOLT	50 €	
+119	rattache	Mohamed Fehdi Ben-Fekih	mfbf@hotmail.fr	+33662727924	191.10	81.30		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+120	rattache	Mehmet Ergun	Mht.Egn1@icloud.com	+33782313002	502.30	305.60		Berline VTC Conforme		9.00	UBER, BOLT	50 €	
+121	Actif	Bryan Grégory	Michaud	+33783633084	bryan.michaud11@gmail.com	Paris (Île-de-France)	EK-113-ND	Berline VTC Conforme	VTC-IDF-2024014	948000013	BOLT, UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+122	Actif	Jovan	Milic	+33695405086	jovan93@outlook.fr	Paris (Île-de-France)	EK-120-ND	Berline VTC Conforme	VTC-IDF-2024021	948000020	BOLT, UBER	60 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+123	rattache	9501a412-f396-4d5e-80e6-05d9b3276311	Mohamed	El Khabazi	1344.86	1331.80		Berline VTC Conforme		-0.44	UBER, BOLT	50 €	
+124	rattache	a2f299ae-f623-4841-935b-52caf47aef66	MOHAMED	ALOUi	551.80	534.47		Berline VTC Conforme		-0.16	UBER, BOLT	50 €	
+125	rattache	59899875-c5d2-40a1-996e-1277a84e76ed	MOHAMED FEHDI	BEN-FEKIH	324.96	311.74		Berline VTC Conforme			UBER, BOLT	50 €	
+126	Actif	Abdoul Azize	Mohamed Safir	+33600000002	safir.abdoul@nordrive-flotte.fr	Paris (Île-de-France)	EK-101-ND	Berline VTC Conforme	VTC-IDF-2024002	948000001	UBER	70 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+127	Actif	Abdel	Mouamane Chelaif		abdel.mouamane chelaif@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			BOLT	0 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+128	rattache	d409253e-52f5-4816-9e78-6b890db203cb	Mourad	Bouakkaz	917.56	876.62		Berline VTC Conforme		-0.24	UBER, BOLT	50 €	
+129	Actif	Robert-ionut	Neagu		robert ionut.neagu@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			BOLT	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+130	Actif	Siré	Niakaté	+33764005951	sireniakate71@gmail.com	Paris (Île-de-France)	EK-138-ND	Berline VTC Conforme	VTC-IDF-2024039	948000038	BOLT, UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+131	rattache	44575ef7-0936-445e-9dad-2325f7d54d1f	Noureddine	Tattouche	641.71	634.38		Berline VTC Conforme		-0.20	UBER, BOLT	50 €	
+132	Actif	Khalid	Okeil	+33685369354	khalidokeil@outlook.fr	Paris (Île-de-France)	EK-123-ND	Berline VTC Conforme	VTC-IDF-2024024	948000023	BOLT, UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+133	rattache	39e958a9-e12f-4199-ba5a-460c3e2d9187	Omar	Chemkhi	288.97	284.04		Berline VTC Conforme		-0.40	UBER, BOLT	50 €	
+134	Actif	Ryan	Ouali Challab		ryan.ouali challab@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			BOLT	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+135	rattache	bac2a019-9062-4116-9085-6da102d70c5d	OUSMANE	SYLLA	123.35	123.11		Berline VTC Conforme		-0.04	UBER, BOLT	50 €	
+136	rattache	bce74b3a-5d74-4cb9-ab0a-c6746f1ccdd8	rachid	CHINOUNE	428.80	388.46		Berline VTC Conforme		-0.32	UBER, BOLT	50 €	
+137	rattache	cadfccc3-9db9-4c32-bbf9-72ba92144aa8	Raed	Loghmari	28.06	27.94		Berline VTC Conforme			UBER, BOLT	50 €	
+138	rattache	Raed Loghmari	raed85@hotmail.fr	+33652147683	606.50	115.80		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+139	Actif	Aina	Raharimanantsoa		aina.raharimanantsoa@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+140	rattache	7e6b9ac8-24f0-4325-902e-2631b16f1f54	Ramzi	Khannoussi	438.78	425.99		Berline VTC Conforme		-0.20	UBER, BOLT	50 €	
+141	rattache	01e09944-7e3c-456e-87ec-7c45c1b3cc26	Raoul Mansfeld	Bemma	433.87	419.26		Berline VTC Conforme		-0.20	UBER, BOLT	50 €	
+142	rattache	e4157312-32c8-469d-b099-30f3b16cbe69	Ratiba	Beldjoudi	132.03	128.50		Berline VTC Conforme			UBER, BOLT	50 €	
+143	rattache	eeffcd94-27a8-4b15-82e4-42996a50bc84	Rayen	Klai	66.15	66.06		Berline VTC Conforme			UBER, BOLT	50 €	
+144	rattache	Rayen Klai	rayenvtc@outlook.fr	+33766833146	195.40	141.10		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+145	Actif	Merouane	Remam	+33656847648	midoremam@hotmail.com	Paris (Île-de-France)	EK-125-ND	Berline VTC Conforme	VTC-IDF-2024026	948000025	BOLT	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+146	rattache	ba779469-ba34-4105-ae7e-5da93a3217f9	Robert-Ionut	Neagu	620.80	602.72		Berline VTC Conforme		-0.16	UBER, BOLT	50 €	
+147	rattache	Robert-Ionut Neagu	robertneagu44@gmail.com	+33656859258	240.80	179.50		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+148	rattache	61931f3a-cf60-42e3-9ef6-52108004b6d6	Ryan	Challab	853.61	488.56		Berline VTC Conforme		-0.12	UBER, BOLT	50 €	
+149	rattache	Ryan Ouali Challab	ryanchallab93600@gmail.com	+33768419070	173.50	172.50		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+150	rattache	ed046710-cb81-4e10-8981-2408f8f6d7a3	Samir	Laazibi	245.42	231.97		Berline VTC Conforme			UBER, BOLT	50 €	
+151	Actif	Imane	Sarraj	+33600000019	imane.sarraj@nordrive-flotte.fr	Paris (Île-de-France)	EK-118-ND	Berline VTC Conforme	VTC-IDF-2024019	948000018	UBER, BOLT	60 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+152	Actif	Karim	Sidibe		karim.sidibe@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			UBER	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+153	rattache	983c63ed-2f31-43bd-b79f-b677ca5065fa	SIRE CYRIL	NIAKATE	1688.69	1673.61		Berline VTC Conforme		-0.12	UBER, BOLT	50 €	
+154	rattache	Siré Niakaté	sireniakate71@gmail.com	+33764005951	423.10	223.90		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+155	rattache	aaab1c40-042f-4a3c-916b-e6b59e4c0f44	Sofiane	Akli	1325.70	1238.63		Berline VTC Conforme		-0.08	UBER, BOLT	50 €	
+156	Actif	Ousmane	Sylla	+33600000031	ousmane.sylla@nordrive-flotte.fr	Paris (Île-de-France)	EK-130-ND	Berline VTC Conforme	VTC-IDF-2024031	948000030	UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+157	Actif	Issa	Tandjigora	+33767662529	issasenypro@gmail.com	Paris (Île-de-France)	EK-119-ND	Berline VTC Conforme	VTC-IDF-2024020	948000019	BOLT, UBER	50 €	Chauffeur historique de la flotte Nordrive (Gestion manuelle)
+158	Actif	Noureddine	Tattouche		noureddine.tattouche@nordrive-flotte.fr	Paris (Île-de-France)		Berline VTC Conforme			BOLT	50 €	Nouveau chauffeur détecté et intégré automatiquement via l'import CSV (Semaine 39).
+159	rattache	Noureddine Tattouche	tattouche.noureddine@yahoo.com	+33675941291	373.90	261.30		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+160	rattache	Ziaed Hamila	Teezere@outlook.fr	+33650235792	835.40	810.40		Berline VTC Conforme		25.00	UBER, BOLT	50 €	
+161	rattache	4afc3041-1d5f-48ca-976b-6e56d4e71b8d	Youcef	Kherfouche	122.45	121.58		Berline VTC Conforme		-0.04	UBER, BOLT	50 €	
+162	rattache	3adffadf-6d60-4a2f-a6e3-4ca3ffe3a72c	YOUNOUSSA	BAH	772.08	767.45		Berline VTC Conforme			UBER, BOLT	50 €	
+163	rattache	a60930ad-c1e7-4984-9893-e4bfe2db96b0	Zahia	Guesri	156.32	151.22		Berline VTC Conforme		-0.03	UBER, BOLT	50 €	
+164	rattache	Zahia Guesri	zaza.guess@hotmail.fr	+33669354856	455.92	304.30		Berline VTC Conforme		0.00	UBER, BOLT	50 €	
+165	rattache	c301c784-1c1d-44fd-8106-615e30556e7e	ZIAED	HAMILA	572.30	559.51		Berline VTC Conforme			UBER, BOLT	50 €	
+166	rattache	Ramzi Khannoussi	ziram_k@yahoo.fr	+33682163015	497.80	295.70		Berline VTC Conforme		0.00	UBER, BOLT	50 €	</textarea>
+    </div>
+  
+
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function copyTable(tsvId, alertId) {
+      const text = document.getElementById(tsvId).value;
+      navigator.clipboard.writeText(text).then(() => {
+        const el = document.getElementById(alertId);
+        el.style.display = 'inline';
+        setTimeout(() => { el.style.display = 'none'; }, 4000);
+      });
+    }
+  </script>
+</body>
+</html>
